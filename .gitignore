@@ -1,0 +1,13 @@
+node_modules/
+dist/
+android/
+ios/
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+GoogleService-Info.plist
+google-services.json
+DerivedData/
+.DS_Store
