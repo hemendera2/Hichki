@@ -4,33 +4,48 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.ts'
+      - 'scripts/**'
+      - 'public/**'
+      - 'index.html'
+      - '.github/workflows/ios.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: hichki-ios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Select Xcode 26
         run: |
+          set -euo pipefail
           XCODE_26=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1 || true)
           if [ -n "$XCODE_26" ]; then
             sudo xcode-select -s "$XCODE_26/Contents/Developer"
           fi
+          xcode-select -p
           xcodebuild -version
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Install web/native dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund --prefer-offline
 
       - name: Build web app
         run: npm run build
@@ -41,16 +56,29 @@ jobs:
       - name: Sync Capacitor iOS
         run: npx cap sync ios
 
+      - name: Resolve Swift packages
+        working-directory: ios/App
+        run: xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
+
+      - name: Verify iOS project
+        run: |
+          test -f ios/App/App.xcodeproj/project.pbxproj
+          test -f ios/App/App/Info.plist
+
       - name: Build iOS simulator app
         working-directory: ios/App
-        shell: bash
         run: |
           set -euo pipefail
-          if [ -f App.xcworkspace/contents.xcworkspacedata ]; then
-            xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS Simulator'
-          else
-            xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS Simulator'
-          fi
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            -destination 'generic/platform=iOS Simulator' \
+            build
 
       - name: Upload iOS simulator app
         uses: actions/upload-artifact@v4
