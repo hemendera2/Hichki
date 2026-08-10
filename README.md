@@ -13,4 +13,11 @@ Hichki is a local-first 1:1 chat, journal and music app designed for web, Androi
 - PWA/service-worker support
 - Push registration hooks for FCM/APNs
 
+## Project source of truth
+
+- [`HICHKI_MASTER_PROJECT_CONTEXT.md`](./HICHKI_MASTER_PROJECT_CONTEXT.md) — canonical product, UX, engineering and quality requirements.
+- [`NEW_CHAT_MASTER_PROMPT.md`](./NEW_CHAT_MASTER_PROMPT.md) — paste into a new ChatGPT/AI chat when continuing the project.
+
+The existing product and UI are the foundation. Future work must **refine Hichki rather than redesign it into a different app**.
+
 See `FINAL_BUILD_CHECKLIST.md` and `PUSH_SETUP.md` for build configuration.
