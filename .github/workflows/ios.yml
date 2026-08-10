@@ -1,25 +1,55 @@
 name: Hichki iOS Simulator
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
+
+permissions:
+  contents: read
+
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
+    timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26 when available
+        run: |
+          XCODE_26=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | head -n 1 || true)
+          if [ -n "$XCODE_26" ]; then
+            sudo xcode-select -s "$XCODE_26/Contents/Developer"
+          fi
+          xcodebuild -version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm install
-      - run: npm run build
-      - run: npx cap add ios || true
-      - run: npx cap sync ios
-      - name: Build iOS simulator
+
+      - name: Install web/native dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Create iOS project
+        run: npx cap add ios
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Build iOS simulator app
         working-directory: ios/App
-        run: xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-      - uses: actions/upload-artifact@v4
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS Simulator' | xcpretty
+
+      - name: Upload iOS simulator app
+        uses: actions/upload-artifact@v4
         with:
           name: hichki-ios-simulator
           path: ios/App/build/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
