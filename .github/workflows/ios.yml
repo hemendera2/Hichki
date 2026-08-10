@@ -45,7 +45,7 @@ jobs:
       - name: Build iOS simulator app
         working-directory: ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS Simulator' | xcpretty
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO -destination 'generic/platform=iOS Simulator'
 
       - name: Upload iOS simulator app
         uses: actions/upload-artifact@v4
