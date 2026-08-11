@@ -8,10 +8,11 @@ The existing Hichki product/UI is the source product. Engineering work is additi
 
 ## Current communication stack
 
-The repository now contains the UI-neutral production bridge for:
+The repository contains UI-neutral production integration layers for:
 
 - Supabase Auth/session persistence
-- authenticated 1:1 conversations
+- authenticated 1:1 conversations through the JWT-protected `hichki-conversation-v2` Edge Function
+- server-only actor-bound conversation creation primitive
 - durable messages with per-sender client-id deduplication
 - Supabase Realtime message delivery
 - Realtime presence/online state
@@ -34,7 +35,7 @@ The legacy message/push tables remain untouched for compatibility.
 
 ## Security
 
-The chat core uses Postgres RLS. Direct conversation creation is server-mediated. Browser assets contain no service-role credentials. The connected Supabase project's current security advisor reports **0 security lints**. Performance advisor notices are informational unused-index candidates and are retained while the chat workload is still being established.
+The chat core uses Postgres RLS. Browser clients cannot directly insert conversations or conversation-membership rows; conversation creation is server-mediated. Privileged database functions are not exposed to `anon` or `authenticated`. Browser assets contain no service-role credentials. The connected Supabase project's current security advisor reports **0 security lints**. Performance advisor notices are informational unused-index candidates and are retained while the chat workload is still being established.
 
 ## Push configuration
 
@@ -45,12 +46,15 @@ Push delivery is deliberately fail-closed when provider credentials are absent. 
 
 The repository never stores those private credentials.
 
-## Source-integrity status
+## Source-integrity and build status
 
-The current `scripts/prepare-web.mjs` still downloads the deployed Hichki web application from `https://hichki.netlify.app` at build time. Therefore the original frontend source is not yet fully vendored into GitHub. The realtime, push, offline, receipt, and music capabilities have been built as UI-neutral integration layers specifically to avoid inventing or replacing the missing Hichki frontend.
+The repository can automatically recover the currently deployed Hichki web artifact into `vendor/hichki-web/` when that source is missing. `scripts/ensure-vendored-source.mjs` then preserves the complete recovered asset tree during the Vite build instead of dropping deployed JavaScript chunks.
 
-This distinction is intentional: backend/integration capability is implemented, but end-to-end visible UI behavior cannot be claimed until the actual Hichki frontend source is available to the repository.
+The original frontend is still not checked into the repository at the time of this commit; source recovery is therefore automated rather than replaced with a newly invented UI.
 
 ## Verification
 
-`.github/workflows/hichki-integrity.yml` validates JavaScript/Edge Function syntax, JSON, required product assets, and browser-side service-role-secret leakage on every push/PR to `main`.
+- `.github/workflows/hichki-integrity.yml` validates JavaScript/Edge Function syntax, JSON, required product assets, server-only chat migrations, and browser-side service-role-secret leakage on every push/PR to `main`.
+- `.github/workflows/hichki-build.yml` performs dependency installation, source recovery, syntax gates, production build, and output checks.
+
+A GitHub Actions green run is still required before claiming the repository build itself has passed; the connector currently exposes no push-run result for the latest commits.
