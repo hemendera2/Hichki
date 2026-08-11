@@ -5,32 +5,58 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: hichki-static-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci --ignore-scripts
+
       - name: Syntax-check project JavaScript
         run: |
+          set -euo pipefail
           node --check scripts/prepare-web.mjs
+          node --check scripts/ensure-vendored-source.mjs
           node --check scripts/inject-hichki-bridge.mjs
           node --check public/hichki-realtime.js
           node --check public/hichki-offline-queue.js
+          node --check hichki-realtime.js
+          node --check hichki-chat-api.js
+          node --check hichki-offline-queue.js
+          node --check hichki-music.js
+          node --check hichki-web-push.js
+          node --check hichki-push-bridge.js
+          node --check native.js
+
       - name: Validate JSON manifests
-        run: node -e "for (const f of ['package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('JSON OK')"
+        run: |
+          set -euo pipefail
+          node -e "for (const f of ['package.json']) { JSON.parse(require('fs').readFileSync(f,'utf8')); console.log(f + ' OK'); }"
+
       - name: Verify required chat assets
         run: |
+          set -euo pipefail
           test -f supabase/functions/hichki-conversation-v1/index.ts
+          test -f supabase/functions/hichki-conversation-v2/index.ts
+          test -f supabase/functions/hichki-conversation-v3/index.ts
           test -f supabase/functions/hichki-push-v3/index.ts
+          test -f supabase/functions/hichki-web-push-v1/index.ts
           test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
+          test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
+          test -f supabase/migrations/20260811090600_hichki_direct_rpc_revoke_authenticated_v2.sql
+          test -f supabase/migrations/20260811090700_hichki_direct_actor_rpc_v1.sql
+          test -f supabase/migrations/20260811090800_hichki_conversation_insert_server_only_v1.sql
           test -f public/hichki-realtime.js
           test -f public/hichki-offline-queue.js
