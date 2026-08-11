@@ -13,6 +13,7 @@ Deno.serve(async req=>{
     const url=Deno.env.get('SUPABASE_URL')!;
     const anon=Deno.env.get('SUPABASE_ANON_KEY')!;
     const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    if(!service)throw Error('server_configuration_error');
     const caller=createClient(url,anon,{global:{headers:{Authorization:authHeader}}});
     const {data:{user},error}=await caller.auth.getUser();
     if(error||!user)throw Error('not_authenticated');
@@ -27,7 +28,7 @@ Deno.serve(async req=>{
     return json({ok:true,conversation_id:conversationId});
   }catch(error){
     const message=error instanceof Error?error.message:String(error);
-    const status=message.includes('not_authenticated')?401:message.includes('recipient_not_found')?404:400;
+    const status=message.includes('not_authenticated')?401:message.includes('recipient_not_found')?404:message==='server_configuration_error'?503:400;
     return json({ok:false,error:message},status);
   }
 });
