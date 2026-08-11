@@ -30,17 +30,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V5"
+          echo "HICHKI_CI_CONTRACT=V6"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test -s scripts/prepare-web.mjs
           test -s scripts/copy-runtime-assets.mjs
           test -s scripts/verify-build-output.mjs
+          test -s scripts/verify-dist-runtime-assets.mjs
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
           grep -Fq "scripts/local-netlify-fetch.mjs" package.json
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
+          grep -Fq "scripts/verify-dist-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
 
       - uses: actions/setup-node@v4
@@ -85,6 +87,7 @@ jobs:
           node --check scripts/inject-hichki-bridge.mjs
           node --check scripts/copy-runtime-assets.mjs
           node --check scripts/verify-build-output.mjs
+          node --check scripts/verify-dist-runtime-assets.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
           node --check hichki-offline-queue.js
@@ -119,4 +122,7 @@ jobs:
           echo "Verifier commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          echo '--- dist root before final verification ---'
+          find dist -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+          node scripts/verify-dist-runtime-assets.mjs
           node scripts/verify-build-output.mjs
