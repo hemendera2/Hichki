@@ -36,6 +36,7 @@ jobs:
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
           grep -Fq "scripts/local-netlify-fetch.mjs" package.json
+          grep -Fq "scripts/copy-runtime-assets.mjs" package.json
 
       - uses: actions/setup-node@v4
         with:
@@ -82,6 +83,7 @@ jobs:
           node --check scripts/local-netlify-fetch.mjs
           node --check scripts/ensure-vendored-source.mjs
           node --check scripts/inject-hichki-bridge.mjs
+          node --check scripts/copy-runtime-assets.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
           node --check hichki-offline-queue.js
@@ -97,13 +99,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s dist/index.html
-          test -s dist/manifest.webmanifest
-          test -s dist/sw.js
-          test -s dist/hichki-realtime.js
-          test -s dist/hichki-chat-api.js
-          test -s dist/hichki-offline-queue.js
-          test -s dist/hichki-music.js
-          test -s dist/hichki-web-push.js
-          test -s dist/hichki-push-bridge.js
-          test -s dist/icon-512-maskable.png
+          required=(
+            dist/index.html
+            dist/manifest.webmanifest
+            dist/sw.js
+            dist/hichki-realtime.js
+            dist/hichki-chat-api.js
+            dist/hichki-offline-queue.js
+            dist/hichki-music.js
+            dist/hichki-web-push.js
+            dist/hichki-push-bridge.js
+            dist/hichki-ux-polish.css
+            dist/icon-512-maskable.png
+          )
+          for file in "${required[@]}"; do
+            if test ! -s "$file"; then
+              echo "MISSING_OR_EMPTY_BUILD_OUTPUT: $file" >&2
+              exit 1
+            fi
+            echo "verified: $file"
+          done
