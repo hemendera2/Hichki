@@ -80,12 +80,17 @@ Deno.serve(async (req) => {
 
     const input = await req.json();
     const conversationId = String(input.conversation_id ?? "");
+    const messageId = String(input.data?.message_id ?? input.message_id ?? "");
     const title = String(input.title ?? "Hichki").slice(0, 80);
     const body = String(input.body ?? "New message").slice(0, 240);
     const data = Object.fromEntries(Object.entries(input.data ?? {}).map(([k, v]) => [String(k), String(v)]));
-    if (!conversationId) throw new Error("conversation_id required");
+    if (!conversationId || !messageId) throw new Error("conversation_id and message_id required");
 
     const admin = createClient(supabaseUrl, serviceRole);
+    const { data: message, error: messageError } = await admin.from("chat_messages").select("id,conversation_id,sender_id").eq("id", messageId).maybeSingle();
+    if (messageError) throw messageError;
+    if (!message || message.conversation_id !== conversationId || message.sender_id !== callerId) throw new Error("message_sender_not_authorized");
+
     const { data: members, error: memberError } = await admin.from("conversation_members").select("user_id").eq("conversation_id", conversationId);
     if (memberError) throw memberError;
     const memberIds = (members ?? []).map((row) => row.user_id as string);
@@ -111,6 +116,8 @@ Deno.serve(async (req) => {
     const sent = await sendFcm(tokens, title, body, data, accessToken, fcmProject);
     return new Response(JSON.stringify({ ok: sent > 0, sent, attempted: tokens.length }), { headers: { ...cors, "content-type": "application/json" } });
   } catch (error) {
-    return new Response(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : String(error) }), { status: 500, headers: { ...cors, "content-type": "application/json" } });
+    const message = error instanceof Error ? error.message : String(error);
+    const status = message === "message_sender_not_authorized" ? 403 : message === "Authenticated user required" || message === "Authorization required" ? 401 : 500;
+    return new Response(JSON.stringify({ ok: false, error: message }), { status, headers: { ...cors, "content-type": "application/json" } });
   }
 });
