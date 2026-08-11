@@ -39,9 +39,10 @@ jobs:
         run: |
           set -euo pipefail
           for f in hichki-realtime.js hichki-chat-api.js hichki-offline-queue.js hichki-music.js hichki-web-push.js hichki-push-bridge.js; do test -f "$f"; done
-          for f in supabase/functions/hichki-conversation-v1/index.ts supabase/functions/hichki-push-v3/index.ts supabase/functions/hichki-web-push-v1/index.ts; do test -f "$f"; done
+          for f in supabase/functions/hichki-conversation-v1/index.ts supabase/functions/hichki-conversation-v2/index.ts supabase/functions/hichki-conversation-v3/index.ts supabase/functions/hichki-push-v3/index.ts supabase/functions/hichki-web-push-v1/index.ts; do test -f "$f"; done
           test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
           test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
+          test -f supabase/migrations/20260811090600_hichki_direct_rpc_revoke_authenticated_v2.sql
       - name: Guard against service-role leakage in browser assets
         shell: bash
         run: |
