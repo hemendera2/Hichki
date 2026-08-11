@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V6"
+          echo "HICHKI_CI_CONTRACT=V7"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
@@ -44,6 +44,7 @@ jobs:
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-dist-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
+          grep -Fq '"build": "npm run prepare:web && vite build && node scripts/verify-dist-runtime-assets.mjs"' package.json
 
       - uses: actions/setup-node@v4
         with:
