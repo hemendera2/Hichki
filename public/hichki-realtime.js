@@ -1,91 +1,22 @@
-/* Hichki realtime bridge v1 — additive integration layer for the existing product. */
+/* Hichki realtime client bridge v5. Browser-safe only: anon credentials are public; service-role secrets never ship here. */
 (() => {
-  const SUPABASE_URL = 'https://mzfwevtiydprksuwalpt.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_ME8_OdUUnXLhahBzdMKiIQ_o-I1WVDW';
-  let clientPromise;
-
-  const loadClient = async () => {
-    if (!clientPromise) {
-      clientPromise = import('https://esm.sh/@supabase/supabase-js@2').then(({ createClient }) =>
-        createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-        })
-      );
-    }
-    return clientPromise;
-  };
-
-  const clientId = () => `${crypto.randomUUID()}-${Date.now().toString(36)}`;
-
-  window.HichkiRealtime = Object.freeze({
-    async client() { return loadClient(); },
-    async session() { const c = await loadClient(); return c.auth.getSession(); },
-    async signUp(email, password, displayName = '') {
-      const c = await loadClient();
-      const result = await c.auth.signUp({ email, password, options: { data: { display_name: displayName.trim() } } });
-      if (!result.error && result.data.user) {
-        await c.from('profiles').upsert({ id: result.data.user.id, display_name: displayName.trim() || email.split('@')[0] });
-      }
-      return result;
-    },
-    async signIn(email, password) { const c = await loadClient(); return c.auth.signInWithPassword({ email, password }); },
-    async signOut() { const c = await loadClient(); return c.auth.signOut(); },
-    async currentUser() { const c = await loadClient(); const { data } = await c.auth.getUser(); return data.user ?? null; },
-    async profile(userId) {
-      const c = await loadClient();
-      const { data, error } = await c.from('profiles').select('id,display_name,avatar_url').eq('id', userId).maybeSingle();
-      return { data, error };
-    },
-    async findProfiles(search = '', limit = 20) {
-      const c = await loadClient();
-      const q = search.trim();
-      let query = c.from('profiles').select('id,display_name,avatar_url').order('display_name').limit(limit);
-      if (q) query = query.ilike('display_name', `%${q.replace(/[%_]/g, '\\$&')}%`);
-      return query;
-    },
-    async directConversation(otherUserId) {
-      const c = await loadClient();
-      const { data: { session } } = await c.auth.getSession();
-      if (!session) throw new Error('not_authenticated');
-      const { data, error } = await c.functions.invoke('hichki-conversation-v1', { body: { other_user_id: otherUserId } });
-      if (error) throw error;
-      if (!data?.conversation_id) throw new Error('conversation_create_failed');
-      return data.conversation_id;
-    },
-    async messages(conversationId, limit = 100) {
-      const c = await loadClient();
-      return c.from('chat_messages').select('id,client_id,conversation_id,sender_id,content,kind,meta,created_at,edited_at,deleted_at').eq('conversation_id', conversationId).order('created_at', { ascending: true }).limit(limit);
-    },
-    async send(conversationId, content, meta = {}) {
-      const c = await loadClient();
-      const { data: { user } } = await c.auth.getUser();
-      if (!user) throw new Error('not_authenticated');
-      const value = String(content ?? '').trim();
-      if (!value) throw new Error('empty_message');
-      const payload = { client_id: clientId(), conversation_id: conversationId, sender_id: user.id, content: value, kind: 'text', meta };
-      const { data, error } = await c.from('chat_messages').insert(payload).select().single();
-      if (error) throw error;
-      return data;
-    },
-    async subscribe(conversationId, onMessage) {
-      const c = await loadClient();
-      const channel = c.channel(`hichki:conversation:${conversationId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` }, payload => onMessage(payload.new))
-        .subscribe();
-      return () => { c.removeChannel(channel); };
-    },
-    async presence(conversationId, userId, onSync) {
-      const c = await loadClient();
-      const channel = c.channel(`hichki:presence:${conversationId}`, { config: { presence: { key: userId } } });
-      channel.on('presence', { event: 'sync' }, () => onSync(channel.presenceState())).on('presence', { event: 'join' }, () => onSync(channel.presenceState())).on('presence', { event: 'leave' }, () => onSync(channel.presenceState()));
-      await channel.subscribe(async status => { if (status === 'SUBSCRIBED') await channel.track({ online_at: new Date().toISOString() }); });
-      return () => { c.removeChannel(channel); };
-    },
-    async registerPushToken(token, platform, deviceId) {
-      const c = await loadClient();
-      const { data: { user } } = await c.auth.getUser();
-      if (!user || !token) return { data: null, error: new Error('not_authenticated') };
-      return c.from('push_subscriptions').upsert({ user_id: user.id, token, platform, device_id: deviceId }, { onConflict: 'user_id,device_id' });
-    },
-  });
+  'use strict';
+  const CFG=window.HICHKI_CONFIG||{};const SUPABASE_URL=CFG.supabaseUrl||document.querySelector('meta[name="hichki-supabase-url"]')?.content||'';const SUPABASE_ANON_KEY=CFG.supabaseAnonKey||document.querySelector('meta[name="hichki-supabase-anon-key"]')?.content||'';
+  const DB='hichki-local-v5',STORE='outbox';const state={client:null,user:null,channels:new Map(),listeners:new Set(),online:navigator.onLine,flushing:false};
+  const emit=(type,detail={})=>{window.dispatchEvent(new CustomEvent(`hichki:${type}`,{detail}));state.listeners.forEach(fn=>{try{fn(type,detail)}catch{}})};const uuid=()=>crypto.randomUUID();
+  function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB'in window))return resolve(null);const req=indexedDB.open(DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE,{keyPath:'client_id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+  async function queuePut(item){const db=await openDB();if(!db)return;await new Promise((r,j)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(item);tx.oncomplete=r;tx.onerror=()=>j(tx.error)})}async function queueAll(){const db=await openDB();if(!db)return[];return new Promise((r,j)=>{const tx=db.transaction(STORE,'readonly'),q=tx.objectStore(STORE).getAll();q.onsuccess=()=>r(q.result||[]);q.onerror=()=>j(q.error)})}async function queueDelete(id){const db=await openDB();if(!db)return;await new Promise((r,j)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=r;tx.onerror=()=>j(tx.error)})}
+  async function loadSDK(){if(window.supabase?.createClient)return window.supabase;await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});return window.supabase}
+  async function init(){if(state.client)return state.client;if(!SUPABASE_URL||!SUPABASE_ANON_KEY){emit('realtime-error',{code:'missing_config'});return null}try{const sdk=await loadSDK();state.client=sdk.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true},realtime:{params:{eventsPerSecond:20}}});const {data}=await state.client.auth.getSession();state.user=data.session?.user||null;state.client.auth.onAuthStateChange((_event,session)=>{state.user=session?.user||null;emit('auth',{user:state.user});if(state.user)flush()});emit('ready',{user:state.user});if(state.user)flush();return state.client}catch(error){emit('realtime-error',{code:'init_failed',error});return null}}
+  async function signIn(email,password){const c=await init();if(!c)throw Error('Hichki backend is not configured');return c.auth.signInWithPassword({email,password})}async function signUp(email,password,displayName=''){const c=await init();if(!c)throw Error('Hichki backend is not configured');return c.auth.signUp({email,password,options:{data:{display_name:displayName}}})}async function signOut(){const c=await init();if(!c)return;for(const [,ch]of state.channels)await c.removeChannel(ch);state.channels.clear();return c.auth.signOut()}
+  async function directConversation(otherUserId){const c=await init();if(!c||!state.user)throw Error('not_authenticated');const {data,error}=await c.functions.invoke('hichki-conversation-v3',{body:{other_user_id:otherUserId}});if(error)throw error;if(!data?.conversation_id)throw Error(data?.error||'conversation_create_failed');return data.conversation_id}
+  async function notifyPush(conversationId,message){try{const c=state.client;if(!c)return;await c.functions.invoke('hichki-push-v3',{body:{conversation_id:conversationId,title:message?.sender_name||'Hichki',body:message?.content||'New message',data:{conversation_id:conversationId,message_id:message?.id||''}}})}catch(error){emit('push-error',{error})}}
+  async function insertMessage(item){const c=state.client;const {data,error}=await c.from('chat_messages').insert(item).select().single();if(error)return{data:item,error,queued:true};emit('message-sent',data);notifyPush(item.conversation_id,data);return{data,queued:false,error:null}}
+  async function sendMessage(conversationId,content,kind='text',meta={}){const c=await init();if(!c||!state.user)throw Error('not_authenticated');const text=String(content??'').trim();if(!text&&kind==='text')throw Error('empty_message');const item={client_id:uuid(),conversation_id:conversationId,content:String(content??''),kind,meta,sender_id:state.user.id,created_at:new Date().toISOString()};if(!state.online){await queuePut(item);emit('message-queued',item);return{data:item,queued:true,error:null}}const result=await insertMessage(item);if(result.error){await queuePut(item);emit('message-queued',{...item,error:result.error})}return result}
+  async function flush(){if(state.flushing||!state.online||!state.user)return;state.flushing=true;try{if(!state.client)await init();if(!state.client)return;for(const item of await queueAll()){const result=await insertMessage(item);if(!result.error||/duplicate|unique/i.test(result.error.message||''))await queueDelete(item.client_id);else emit('message-retry-needed',{item,error:result.error})}}finally{state.flushing=false}}
+  async function markRead(messageId){const c=await init();if(!c||!state.user)throw Error('not_authenticated');const {error}=await c.from('message_receipts').upsert({message_id:messageId,user_id:state.user.id,read_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'message_id,user_id'});if(error)throw error;emit('read',{messageId,userId:state.user.id})}async function markDelivered(messageId){const c=await init();if(!c||!state.user)throw Error('not_authenticated');const {error}=await c.from('message_receipts').upsert({message_id:messageId,user_id:state.user.id,delivered_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'message_id,user_id'});if(error)throw error}
+  async function subscribe(conversationId,callback){const c=await init();if(!c)throw Error('backend_not_configured');if(state.channels.has(conversationId))return state.channels.get(conversationId);const channel=c.channel(`hichki:conversation:${conversationId}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:`conversation_id=eq.${conversationId}`},payload=>{callback?.(payload.new);emit('message',payload.new);if(payload.new?.sender_id!==state.user?.id)markDelivered(payload.new.id).catch(()=>{})}).on('postgres_changes',{event:'INSERT',schema:'public',table:'message_receipts'},payload=>emit('receipt',payload.new)).on('postgres_changes',{event:'UPDATE',schema:'public',table:'message_receipts'},payload=>emit('receipt',payload.new)).on('broadcast',{event:'typing'},payload=>emit('typing',payload.payload)).on('presence',{event:'sync'},()=>emit('presence',channel.presenceState())).on('presence',{event:'join'},p=>emit('presence-join',p)).on('presence',{event:'leave'},p=>emit('presence-leave',p));await channel.subscribe(async status=>{if(status==='SUBSCRIBED'&&state.user)await channel.track({user_id:state.user.id,online_at:new Date().toISOString()});emit('channel',{conversationId,status})});state.channels.set(conversationId,channel);return channel}
+  async function setTyping(conversationId,isTyping){const ch=state.channels.get(conversationId);if(!ch||!state.user)return;await ch.send({type:'broadcast',event:'typing',payload:{user_id:state.user.id,is_typing:Boolean(isTyping),at:Date.now()}})}async function unsubscribe(conversationId){const c=state.client,ch=state.channels.get(conversationId);if(c&&ch){await c.removeChannel(ch);state.channels.delete(conversationId)}}
+  async function registerPushToken(token,platform='web',deviceId=uuid()){const c=await init();if(!c||!state.user)throw Error('not_authenticated');const {error}=await c.from('push_subscriptions').upsert({user_id:state.user.id,token,platform,device_id:deviceId,updated_at:new Date().toISOString()},{onConflict:'user_id,device_id'});if(error)throw error;emit('push-registered',{platform,deviceId})}
+  function on(fn){state.listeners.add(fn);return()=>state.listeners.delete(fn)}window.HichkiRealtime={init,signIn,signUp,signOut,directConversation,sendMessage,flush,subscribe,unsubscribe,setTyping,markRead,markDelivered,registerPushToken,on,get user(){return state.user},get online(){return state.online}};window.addEventListener('online',()=>{state.online=true;emit('online');flush()});window.addEventListener('offline',()=>{state.online=false;emit('offline')});window.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')flush()});init().catch(()=>{});
 })();
