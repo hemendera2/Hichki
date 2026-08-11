@@ -28,6 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/prepare-web.mjs
+          node --check scripts/local-netlify-fetch.mjs
           node --check scripts/ensure-vendored-source.mjs
           node --check scripts/inject-hichki-bridge.mjs
           node --check public/hichki-realtime.js
