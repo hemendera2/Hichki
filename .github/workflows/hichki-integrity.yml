@@ -43,6 +43,7 @@ jobs:
           test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
           test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
           test -f supabase/migrations/20260811090600_hichki_direct_rpc_revoke_authenticated_v2.sql
+          test -f supabase/migrations/20260811090700_hichki_direct_actor_rpc_v1.sql
       - name: Guard against service-role leakage in browser assets
         shell: bash
         run: |
