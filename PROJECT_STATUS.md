@@ -1,10 +1,10 @@
 # Hichki — Current Project Status
 
-_Last verified against GitHub `main`: 2026-08-11_
+_Last verified against GitHub `main` and the connected Hichki Supabase project: 2026-08-11_
 
 ## Current revision
 
-- HEAD: `dffc7ecfb1cc30d5348379d960401bb124f1165d`
+- Latest GitHub commit: `81d66716c2d81ba1b0656bbc1c3731dd1c3e4edd`
 - Repository: `hemendera2/Hichki`
 - Default branch: `main`
 - Visibility: public
@@ -14,7 +14,7 @@ _Last verified against GitHub `main`: 2026-08-11_
 
 Hichki is defined as a local-first 1:1 chat, journal and music app for web, Android and iOS from one codebase.
 
-The repository currently contains integration/security layers for:
+The repository contains integration/security layers for:
 
 - Supabase Auth/session persistence
 - authenticated 1:1 conversation creation and messaging
@@ -31,20 +31,27 @@ The repository currently contains integration/security layers for:
 - server-mediated conversation creation
 - local/user-owned music playback with Media Session support
 
-## Security state recorded in the repository
+## Security work completed in this continuation
 
-- Direct conversation insertion from browser clients is disabled.
-- Conversation creation is server-mediated and actor-bound.
-- Privileged database functions are not intended to be exposed to `anon` or `authenticated`.
-- Legacy push endpoints are fail-closed; current clients use the v3 path.
-- Browser assets are guarded against service-role credential leakage by CI.
-- Push provider credentials are environment configuration and are not stored in the repository.
+- Strengthened production build-output verification.
+- Added explicit project completion gates.
+- Audited the connected Hichki Supabase project (`mzfwevtiydprksuwalpt`).
+- Confirmed PostgreSQL 17.6 and all eight current public application tables have RLS enabled.
+- Confirmed the active chat tables use membership-scoped policies and self-scoped receipt/profile/push policies.
+- Found a legacy `public.messages` table with public `Allow all inserts` and `Allow all selects` policies. This was a real security defect in the connected database state.
+- Added repository migration `20260811105000_hichki_legacy_messages_lockdown_v1.sql` to revoke `anon`/`authenticated` access and remove those legacy policies. The migration is committed to GitHub but was deliberately **not applied to the live Supabase project**, because production mutation requires explicit authorization under the project's execution rules.
+- Supabase security advisor currently reports no security lints.
+- Supabase performance advisor reports only INFO-level unused-index candidates; no correctness/security failure was reported.
+
+## Source / migration drift
+
+The connected Supabase project has migrations through `20260811080242_hichki_chat_anon_privilege_hardening_v1`, while the repository's migration set does not contain that exact migration file. This is a source-of-truth drift that must be reconciled before declaring schema state reproducible from Git alone.
 
 ## Build/source architecture
 
 The original Hichki frontend is not checked into `main`. The build recovers the currently deployed web artifact into `vendor/hichki-web/`, then preserves that recovered source through the Vite build rather than replacing the product with a newly invented frontend.
 
-This is intentional in the current architecture, but it is also the principal source-integrity limitation: the canonical editable frontend source is external to the repository.
+This remains the principal source-integrity limitation: the canonical editable frontend source is external to the repository.
 
 ## Verification state
 
@@ -56,7 +63,7 @@ The repository has dedicated integrity, static-verification and production-build
 - required manifest icons
 - build output diagnostics
 
-The connected GitHub Actions query currently returns no workflow-run records for the latest commit, so a green GitHub Actions result is **not verified** from the available tooling.
+The connected GitHub Actions query returns no workflow-run records for the current commits, so a green GitHub Actions result is **not verified** from the available tooling.
 
 ## Completion gate
 
@@ -65,8 +72,8 @@ Do not label the project fully production-complete until all of the following ar
 1. GitHub Actions integrity/static/build workflows execute successfully on the current revision.
 2. Production build output passes the repository-owned verifier.
 3. The deployed/recovered frontend is confirmed to contain the intended current Hichki product UI and all injected runtime integrations.
-4. Supabase migration/function state is validated against the intended production project without exposing secrets.
+4. Supabase migration/function state is reconciled with the repository and the legacy `messages` lockdown is applied through an authorized migration path.
 5. End-to-end authenticated chat, offline retry, realtime delivery, receipts, presence/typing and push paths receive runtime evidence.
 6. Android/iOS native build workflows are green for the supported targets.
 
-Until those gates are evidenced, the project status is **implementation substantially advanced, verification incomplete** rather than falsely marked complete.
+Until those gates are evidenced, the project status is **implementation substantially advanced, verification incomplete**. No false completion claim is recorded.
