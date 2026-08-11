@@ -2,7 +2,14 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 const path = 'index.html';
 let html = await readFile(path, 'utf8');
-const marker = 'HICHKI_REALTIME_BRIDGE_V2';
+const marker = 'HICHKI_REALTIME_BRIDGE_V3';
+
+const supabaseUrl = process.env.HICHKI_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.HICHKI_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+if (supabaseUrl && supabaseAnonKey && !html.includes('hichki-supabase-anon-key')) {
+  const config = `<meta name="hichki-supabase-url" content="${supabaseUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"><meta name="hichki-supabase-anon-key" content="${supabaseAnonKey.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
+  html = html.replace('</head>', `${config}</head>`);
+}
 
 if (!html.includes(marker)) {
   const bridge = `
@@ -22,7 +29,7 @@ if (!html.includes(marker)) {
   };
   window.addEventListener('hichki:native-push-token', event => register(event.detail));
   window.HichkiRegisterPushToken = register;
-  window.addEventListener('hichki:auth-ready', () => window.HichkiOfflineQueue?.flush());
+  window.addEventListener('hichki:auth', () => window.HichkiOfflineQueue?.flush());
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(error => console.warn('Hichki service worker:', error));
 })();
 </script>
@@ -30,7 +37,7 @@ if (!html.includes(marker)) {
   html = html.replace('</body>', `${bridge}</body>`);
 }
 
-const sw = `const CACHE='hichki-shell-v3';
+const sw = `const CACHE='hichki-shell-v4';
 const STATIC=['/','/index.html','/manifest.webmanifest','/icon-192.png','/icon-512.png','/icon-512-maskable.png','/apple-touch-icon.png','/hichki-realtime.js','/hichki-offline-queue.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
