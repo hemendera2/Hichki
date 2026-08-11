@@ -1,0 +1,45 @@
+name: Hichki integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in scripts/*.mjs hichki-realtime.js hichki-offline-queue.js supabase/functions/*/index.ts; do
+            [ -f "$f" ] || continue
+            case "$f" in
+              *.mjs|*.js) node --check "$f" ;;
+              *.ts) npx --yes esbuild "$f" --format=esm --platform=neutral --outfile=/tmp/hichki-check.js ;;
+            esac
+          done
+      - name: Validate JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find . -type f -name '*.json' -not -path './.git/*'); do node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));" "$f"; done
+      - name: Validate required chat assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f hichki-realtime.js
+          test -f hichki-offline-queue.js
+          test -f supabase/functions/hichki-conversation-v1/index.ts
+          test -f supabase/functions/hichki-push-v3/index.ts
+          test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
