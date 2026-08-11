@@ -30,11 +30,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V3"
+          echo "HICHKI_CI_CONTRACT=V4"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test -s scripts/prepare-web.mjs
+          test -s scripts/copy-runtime-assets.mjs
           test -s scripts/verify-build-output.mjs
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
@@ -91,6 +92,22 @@ jobs:
           node --check hichki-web-push.js
           node --check hichki-push-bridge.js
           node --check native.js
+
+      - name: Verify runtime asset sources before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            hichki-realtime.js \
+            hichki-chat-api.js \
+            hichki-offline-queue.js \
+            hichki-music.js \
+            hichki-web-push.js \
+            hichki-push-bridge.js \
+            hichki-ux-polish.css; do
+            test -s "$file"
+            echo "runtime source verified: $file ($(wc -c < "$file") bytes)"
+          done
 
       - name: Build production bundle
         run: npm run build
