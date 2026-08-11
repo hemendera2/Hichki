@@ -12,20 +12,33 @@ permissions:
 
 jobs:
   recover:
-    if: ${{ hashFiles('vendor/hichki-web/index.html') == '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Check whether deployed source is already vendored
+        id: source
+        shell: bash
+        run: |
+          if test -f vendor/hichki-web/index.html; then
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Mirror deployed Hichki artifact
+        if: steps.source.outputs.missing == 'true'
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .recovered-hichki
           mkdir -p .recovered-hichki
           wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=.recovered-hichki https://hichki.netlify.app/
+
       - name: Normalize recovered artifact
+        if: steps.source.outputs.missing == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -35,7 +48,9 @@ jobs:
           mkdir -p vendor/hichki-web
           cp -a "$src"/. vendor/hichki-web/
           rm -rf .recovered-hichki
+
       - name: Make prepare-web prefer the recovered artifact
+        if: steps.source.outputs.missing == 'true'
         shell: python
         run: |
           from pathlib import Path
@@ -46,13 +61,26 @@ jobs:
               s=s.replace("const base = 'https://hichki.netlify.app';", marker+"\nconst localRoot='vendor/hichki-web';\n")
               old="for (const file of requiredRemoteFiles) {"
               new="if (existsSync(LOCAL_HICHKI)) {\n  await copyFile(LOCAL_HICHKI, 'index.html');\n  for (const file of requiredRemoteFiles.slice(1)) { if (existsSync(`${localRoot}/${file}`)) await copyFile(`${localRoot}/${file}`, `public/${file}`); }\n} else {\n  for (const file of requiredRemoteFiles) {"
+              if old not in s: raise SystemExit('prepare-web download loop not found; refusing rewrite')
               s=s.replace(old,new,1)
               needle="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n}\n"
               replacement="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n  }\n}\n"
-              if needle not in s: raise SystemExit('prepare-web loop shape changed; refusing automatic rewrite')
+              if needle not in s: raise SystemExit('prepare-web loop ending changed; refusing rewrite')
               s=s.replace(needle,replacement,1)
               p.write_text(s)
+
+      - name: Validate recovered source and build inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test "${{ steps.source.outputs.missing }}" = "true"; then
+            test -f vendor/hichki-web/index.html
+          fi
+          node --check scripts/prepare-web.mjs
+          node --check scripts/inject-hichki-bridge.mjs
+
       - name: Commit recovered source
+        if: steps.source.outputs.missing == 'true'
         shell: bash
         run: |
           set -euo pipefail
