@@ -37,37 +37,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if test -f vendor/hichki-web/index.html; then
+          if test -s vendor/hichki-web/index.html; then
             echo 'Vendored Hichki source already present.'
             exit 0
           fi
 
-          rm -rf .recovered-hichki
-          mkdir -p .recovered-hichki
-
-          # The deployed Hichki page is the canonical frontend source until the
-          # original frontend is checked into this repository. Wget may return a
-          # non-zero code for optional remote assets; the index and usable tree
-          # are validated explicitly below instead of treating those as success.
-          set +e
-          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent \
-            --directory-prefix=.recovered-hichki \
-            https://hichki.netlify.app/
-          wget_status=$?
-          set -e
-
-          src=$(find .recovered-hichki -type f -name index.html -print -quit)
-          if test -z "$src"; then
-            echo "Unable to recover Hichki frontend: no index.html was downloaded (wget status $wget_status)." >&2
-            exit 1
-          fi
-
           rm -rf vendor/hichki-web
           mkdir -p vendor/hichki-web
-          root=$(dirname "$src")
-          cp -a "$root"/. vendor/hichki-web/
-          rm -rf .recovered-hichki
+          base='https://hichki.netlify.app'
+
+          # Recover only the deterministic inputs consumed by prepare:web.
+          # Do not mirror the deployed page: wget --page-requisites parses
+          # runtime template strings such as ${m.src} as literal URLs and
+          # creates misleading 404s. Optional site files (for example
+          # robots.txt) are deliberately outside the build source contract.
+          for file in index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png; do
+            curl --fail --silent --show-error --location \
+              --output "vendor/hichki-web/$file" \
+              "$base/$file"
+          done
+
           test -s vendor/hichki-web/index.html
+          test -s vendor/hichki-web/manifest.webmanifest
+          test -s vendor/hichki-web/icon-192.png
+          test -s vendor/hichki-web/icon-512.png
+          test -s vendor/hichki-web/apple-touch-icon.png
 
       - name: Static JavaScript syntax checks
         shell: bash
