@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V4"
+          echo "HICHKI_CI_CONTRACT=V5"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
@@ -114,4 +114,9 @@ jobs:
 
       - name: Verify build output
         shell: bash
-        run: node scripts/verify-build-output.mjs
+        run: |
+          set -euo pipefail
+          echo "Verifier commit: $(git rev-parse HEAD)"
+          echo "Expected commit: ${GITHUB_SHA}"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          node scripts/verify-build-output.mjs
