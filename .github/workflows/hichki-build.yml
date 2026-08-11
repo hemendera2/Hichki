@@ -18,14 +18,28 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install
         run: npm install --no-audit --no-fund
+      - name: Static JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/prepare-web.mjs
+          node --check scripts/inject-hichki-bridge.mjs
+          node --check hichki-realtime.js
+          node --check hichki-chat-api.js
+          node --check hichki-offline-queue.js
+          node --check hichki-music.js
+          node --check hichki-web-push.js
+          node --check hichki-push-bridge.js
+          node --check native.js
       - name: Build production bundle
         run: npm run build
       - name: Verify build output
@@ -36,4 +50,8 @@ jobs:
           test -f dist/manifest.webmanifest
           test -f dist/sw.js
           test -f dist/hichki-realtime.js
+          test -f dist/hichki-chat-api.js
+          test -f dist/hichki-offline-queue.js
           test -f dist/hichki-music.js
+          test -f dist/hichki-web-push.js
+          test -f dist/hichki-push-bridge.js
