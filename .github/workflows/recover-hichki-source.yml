@@ -1,0 +1,61 @@
+name: Recover Hichki deployed source
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * 0'
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Mirror deployed Hichki artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .recovered-hichki
+          mkdir -p .recovered-hichki
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=.recovered-hichki https://hichki.netlify.app/
+      - name: Normalize recovered artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          src=.recovered-hichki/hichki.netlify.app
+          test -f "$src/index.html"
+          rm -rf vendor/hichki-web
+          mkdir -p vendor/hichki-web
+          cp -a "$src"/. vendor/hichki-web/
+          rm -rf .recovered-hichki
+      - name: Make prepare-web prefer the recovered artifact
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('scripts/prepare-web.mjs')
+          s=p.read_text()
+          marker="const LOCAL_HICHKI='vendor/hichki-web/index.html';"
+          if marker not in s:
+              s=s.replace("const base = 'https://hichki.netlify.app';", marker+"\nconst localRoot='vendor/hichki-web';\n")
+              old="for (const file of requiredRemoteFiles) {"
+              new="if (existsSync(LOCAL_HICHKI)) {\n  await copyFile(LOCAL_HICHKI, 'index.html');\n  for (const file of requiredRemoteFiles.slice(1)) { if (existsSync(`${localRoot}/${file}`)) await copyFile(`${localRoot}/${file}`, `public/${file}`); }\n} else {\n  for (const file of requiredRemoteFiles) {"
+              s=s.replace(old,new,1)
+              needle="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n}\n"
+              replacement="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n  }\n}\n"
+              if needle not in s: raise SystemExit('prepare-web loop shape changed; refusing automatic rewrite')
+              s=s.replace(needle,replacement,1)
+              p.write_text(s)
+      - name: Commit recovered source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add vendor/hichki-web scripts/prepare-web.mjs
+          if git diff --cached --quiet; then echo 'No deployed-source changes.'; exit 0; fi
+          git commit -m 'chore(source): recover deployed Hichki artifact'
+          git push
