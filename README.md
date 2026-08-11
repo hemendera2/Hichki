@@ -16,8 +16,26 @@ Hichki is a local-first 1:1 chat, journal and music app designed for web, Androi
 ## Project source of truth
 
 - [`HICHKI_MASTER_PROJECT_CONTEXT.md`](./HICHKI_MASTER_PROJECT_CONTEXT.md) — canonical product, UX, engineering and quality requirements.
-- [`NEW_CHAT_MASTER_PROMPT.md`](./NEW_CHAT_MASTER_PROMPT.md) — paste into a new ChatGPT/AI chat when continuing the project.
+- [`NEW_CHAT_MASTER_PROMPT.md`](./NEW_CHAT_MASTER_PROMPT.md) — continuation operating instructions.
 
 The existing product and UI are the foundation. Future work must **refine Hichki rather than redesign it into a different app**.
+
+## Backend progress — 2026-08-11
+
+The connected Supabase project `Hichki` now contains a separate secure chat-core schema for the real person-to-person architecture:
+
+- authenticated profiles
+- direct conversations and conversation membership
+- durable `chat_messages` with client-id deduplication
+- Row Level Security scoped to conversation membership
+- Realtime publication for `chat_messages`
+- per-user push subscriptions
+- authenticated `hichki-push-v3` Edge Function for Android/iOS push delivery through FCM when the required FCM secrets are configured
+
+The legacy `public.messages` / `push_devices` path remains untouched for compatibility while the actual Hichki web source is recovered into the repository. The new secure path is intentionally additive so the existing product is not broken by a backend migration that the current source tree cannot yet consume.
+
+## Current source-integrity blocker
+
+The repository's current `scripts/prepare-web.mjs` still downloads the Hichki web application from `https://hichki.netlify.app` at build time. The actual web application source is therefore not yet fully vendored into this repository. Until that source is recovered, frontend integration of the new authenticated chat core cannot be honestly claimed as complete.
 
 See `FINAL_BUILD_CHECKLIST.md` and `PUSH_SETUP.md` for build configuration.
