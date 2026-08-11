@@ -1,0 +1,36 @@
+name: Hichki Static Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Syntax-check project JavaScript
+        run: |
+          node --check scripts/prepare-web.mjs
+          node --check scripts/inject-hichki-bridge.mjs
+          node --check public/hichki-realtime.js
+          node --check public/hichki-offline-queue.js
+      - name: Validate JSON manifests
+        run: node -e "for (const f of ['package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('JSON OK')"
+      - name: Verify required chat assets
+        run: |
+          test -f supabase/functions/hichki-conversation-v1/index.ts
+          test -f supabase/functions/hichki-push-v3/index.ts
+          test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
+          test -f public/hichki-realtime.js
+          test -f public/hichki-offline-queue.js
