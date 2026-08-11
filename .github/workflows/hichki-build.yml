@@ -26,6 +26,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify checkout and build-source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Building commit: $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -s scripts/prepare-web.mjs
+          ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
+          grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
+          grep -Fq "scripts/local-netlify-fetch.mjs" package.json
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -95,3 +106,4 @@ jobs:
           test -s dist/hichki-music.js
           test -s dist/hichki-web-push.js
           test -s dist/hichki-push-bridge.js
+          test -s dist/icon-512-maskable.png
