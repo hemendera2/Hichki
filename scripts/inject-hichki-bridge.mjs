@@ -1,50 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
-
-const path = 'index.html';
-let html = await readFile(path, 'utf8');
-const marker = 'HICHKI_REALTIME_BRIDGE_V3';
-
-const supabaseUrl = process.env.HICHKI_SUPABASE_URL || process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.HICHKI_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
-if (supabaseUrl && supabaseAnonKey && !html.includes('hichki-supabase-anon-key')) {
-  const config = `<meta name="hichki-supabase-url" content="${supabaseUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"><meta name="hichki-supabase-anon-key" content="${supabaseAnonKey.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">`;
-  html = html.replace('</head>', `${config}</head>`);
-}
-
-if (!html.includes(marker)) {
-  const bridge = `
-<!-- ${marker} -->
-<script src="/hichki-realtime.js" defer></script>
-<script src="/hichki-offline-queue.js" defer></script>
-<script>
-(() => {
-  const register = async (token) => {
-    if (!token || !window.HichkiRealtime) return;
-    try {
-      let deviceId = localStorage.getItem('hichki.deviceId');
-      if (!deviceId) { deviceId = crypto.randomUUID(); localStorage.setItem('hichki.deviceId', deviceId); }
-      const platform = /Android/i.test(navigator.userAgent) ? 'android' : /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'ios' : 'web';
-      await window.HichkiRealtime.registerPushToken(token, platform, deviceId);
-    } catch (error) { console.warn('Hichki push token sync:', error); }
-  };
-  window.addEventListener('hichki:native-push-token', event => register(event.detail));
-  window.HichkiRegisterPushToken = register;
-  window.addEventListener('hichki:auth', () => window.HichkiOfflineQueue?.flush());
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(error => console.warn('Hichki service worker:', error));
-})();
-</script>
-`;
-  html = html.replace('</body>', `${bridge}</body>`);
-}
-
-const sw = `const CACHE='hichki-shell-v4';
-const STATIC=['/','/index.html','/manifest.webmanifest','/icon-192.png','/icon-512.png','/icon-512-maskable.png','/apple-touch-icon.png','/hichki-realtime.js','/hichki-offline-queue.js'];
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting())));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
-self.addEventListener('push',event=>{let data={};try{data=event.data?.json()||{};}catch{data={body:event.data?.text()||'New message'};}const title=data.title||'Hichki';const options={body:data.body||'New message',icon:'/icon-192.png',badge:'/icon-192.png',data:data.data||{}};event.waitUntil(self.registration.showNotification(title,options));});
-self.addEventListener('notificationclick',event=>{event.notification.close();const target=event.notification.data?.url||'/';event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus' in client){client.navigate(target);return client.focus();}}return clients.openWindow(target);}));});
-self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==location.origin)return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('/index.html',copy)).catch(()=>{});return response;}).catch(()=>caches.match('/index.html')));return;}event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone())).catch(()=>{});return response;})));});
-`;
-await writeFile('public/sw.js', sw, 'utf8');
-await writeFile(path, html, 'utf8');
-console.log('Hichki realtime bridge injected');
+const path='index.html';let html=await readFile(path,'utf8');const marker='HICHKI_REALTIME_BRIDGE_V4';
+const supabaseUrl=process.env.HICHKI_SUPABASE_URL||process.env.SUPABASE_URL||'';const supabaseAnonKey=process.env.HICHKI_SUPABASE_ANON_KEY||process.env.SUPABASE_ANON_KEY||'';
+if(supabaseUrl&&supabaseAnonKey&&!html.includes('hichki-supabase-anon-key')){const esc=s=>s.replace(/&/g,'&amp;').replace(/"/g,'&quot;');html=html.replace('</head>',`<meta name="hichki-supabase-url" content="${esc(supabaseUrl)}"><meta name="hichki-supabase-anon-key" content="${esc(supabaseAnonKey)}"></head>`)}
+if(!html.includes(marker)){const bridge=`<!-- ${marker} -->
+<script src="/hichki-realtime.js" defer></script><script src="/hichki-chat-api.js" defer></script><script src="/hichki-offline-queue.js" defer></script>
+<script>(()=>{const register=async token=>{if(!token||!window.HichkiRealtime)return;try{let deviceId=localStorage.getItem('hichki.deviceId');if(!deviceId){deviceId=crypto.randomUUID();localStorage.setItem('hichki.deviceId',deviceId)}const platform=/Android/i.test(navigator.userAgent)?'android':/iPhone|iPad|iPod/i.test(navigator.userAgent)?'ios':'web';await window.HichkiRealtime.registerPushToken(token,platform,deviceId)}catch(error){console.warn('Hichki push token sync:',error)}};window.addEventListener('hichki:native-push-token',e=>register(e.detail));window.HichkiRegisterPushToken=register;window.addEventListener('hichki:auth',()=>window.HichkiOfflineQueue?.flush());if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(error=>console.warn('Hichki service worker:',error))})();</script>`;html=html.replace('</body>',`${bridge}</body>`)}
+const sw=`const CACHE='hichki-shell-v5';const STATIC=['/','/index.html','/manifest.webmanifest','/icon-192.png','/icon-512.png','/icon-512-maskable.png','/apple-touch-icon.png','/hichki-realtime.js','/hichki-chat-api.js','/hichki-offline-queue.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('push',e=>{let d={};try{d=e.data?.json()||{}}catch{d={body:e.data?.text()||'New message'}}const title=d.title||'Hichki';e.waitUntil(self.registration.showNotification(title,{body:d.body||'New message',icon:'/icon-192.png',badge:'/icon-192.png',data:d.data||{}}))});self.addEventListener('notificationclick',e=>{e.notification.close();const target=e.notification.data?.url||'/';e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const c of list){if('focus'in c){c.navigate(target);return c.focus()}}return clients.openWindow(target)}))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put('/index.html',copy)).catch(()=>{});return r}).catch(()=>caches.match('/index.html')));return}e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(r=>{if(r.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone())).catch(()=>{});return r})))});`;
+await writeFile('public/sw.js',sw,'utf8');await writeFile(path,html,'utf8');console.log('Hichki realtime bridge injected');
