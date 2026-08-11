@@ -10,15 +10,21 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("not_authenticated");
-    const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const { data: { user }, error } = await client.auth.getUser();
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const caller = createClient(url, anon, { global: { headers: { Authorization: authHeader } } });
+    const { data: { user }, error } = await caller.auth.getUser();
     if (error || !user) throw new Error("not_authenticated");
     const body = await req.json();
     const otherUserId = typeof body?.other_user_id === "string" ? body.other_user_id : "";
     if (!otherUserId || otherUserId === user.id) throw new Error("invalid_recipient");
-    const { data, error: rpcError } = await client.rpc("hichki_create_direct", { p_other_user_id: otherUserId });
+    const admin = createClient(url, service);
+    const { data: recipient, error: recipientError } = await admin.auth.admin.getUserById(otherUserId);
+    if (recipientError || !recipient.user) throw new Error("recipient_not_found");
+    const { data: conversationId, error: rpcError } = await admin.rpc("hichki_create_direct", { p_other_user_id: otherUserId });
     if (rpcError) throw rpcError;
-    return json({ ok: true, conversation_id: data, created: true });
+    return json({ ok: true, conversation_id: conversationId, created: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = message.includes("not_authenticated") ? 401 : message.includes("recipient_not_found") ? 404 : 400;
