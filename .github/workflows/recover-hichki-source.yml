@@ -1,6 +1,8 @@
 name: Recover Hichki deployed source
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: '17 2 * * 0'
@@ -10,6 +12,7 @@ permissions:
 
 jobs:
   recover:
+    if: ${{ hashFiles('vendor/hichki-web/index.html') == '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
