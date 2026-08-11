@@ -21,7 +21,7 @@ begin
   order by c.created_at asc limit 1;
 
   if conversation_id is not null then return conversation_id; end if;
-  insert into public.conversations(kind) values('direct') returning id into conversation_id;
+  insert into public.conversations(kind,created_by) values('direct',me) returning id into conversation_id;
   insert into public.conversation_members(conversation_id,user_id) values(conversation_id,me),(conversation_id,p_other_user_id);
   return conversation_id;
 end;
