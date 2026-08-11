@@ -30,6 +30,7 @@ The connected Supabase project `Hichki` now contains a separate secure chat-core
 - Row Level Security scoped to conversation membership
 - Realtime publication for `chat_messages`
 - per-user push subscriptions
+- secure direct-conversation creation RPC
 - authenticated `hichki-push-v3` Edge Function for Android/iOS push delivery through FCM when the required FCM secrets are configured
 
 The legacy `public.messages` / `push_devices` path remains untouched for compatibility while the actual Hichki web source is recovered into the repository. The new secure path is intentionally additive so the existing product is not broken by a backend migration that the current source tree cannot yet consume.
@@ -38,4 +39,7 @@ The legacy `public.messages` / `push_devices` path remains untouched for compati
 
 The repository's current `scripts/prepare-web.mjs` still downloads the Hichki web application from `https://hichki.netlify.app` at build time. The actual web application source is therefore not yet fully vendored into this repository. Until that source is recovered, frontend integration of the new authenticated chat core cannot be honestly claimed as complete.
 
-See `FINAL_BUILD_CHECKLIST.md` and `PUSH_SETUP.md` for build configuration.
+## Build configuration
+
+- `FINAL_BUILD_CHECKLIST.md` contains the native build checklist.
+- Push delivery configuration is documented by the `hichki-push-v3` function source and its environment requirements.
