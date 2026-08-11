@@ -1,4 +1,4 @@
-import { mkdir, copyFile } from 'node:fs/promises';
+import { mkdir, copyFile, stat } from 'node:fs/promises';
 
 const assets = [
   'hichki-realtime.js',
@@ -13,7 +13,20 @@ const assets = [
 await mkdir('public', { recursive: true });
 
 for (const asset of assets) {
-  await copyFile(asset, `public/${asset}`);
+  const source = await stat(asset).catch(() => null);
+  if (!source?.isFile() || source.size === 0) {
+    throw new Error(`Required runtime asset is missing or empty: ${asset}`);
+  }
+
+  const destination = `public/${asset}`;
+  await copyFile(asset, destination);
+
+  const copied = await stat(destination);
+  if (!copied.isFile() || copied.size !== source.size || copied.size === 0) {
+    throw new Error(`Runtime asset copy verification failed: ${asset}`);
+  }
+
+  console.log(`Verified runtime asset: ${asset} (${copied.size} bytes)`);
 }
 
-console.log(`Copied ${assets.length} Hichki runtime assets into public/.`);
+console.log(`Copied and verified ${assets.length} Hichki runtime assets into public/.`);
