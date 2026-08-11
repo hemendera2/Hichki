@@ -1,3 +1,7 @@
+-- The actor-bound primitive must be valid on a fresh database before any later migration runs.
+alter table public.conversations
+  add column if not exists created_by uuid references auth.users(id) on delete set null;
+
 create or replace function public.hichki_create_direct_for_actor(p_actor_id uuid,p_other_user_id uuid)
 returns uuid
 language plpgsql
