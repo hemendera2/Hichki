@@ -4,7 +4,7 @@
   "version": "2.5.0",
   "description": "Hichki — local-first 1:1 chat, journal and music app",
   "scripts": {
-    "prepare:web": "node scripts/prepare-web.mjs",
+    "prepare:web": "node scripts/prepare-web.mjs && node scripts/inject-hichki-bridge.mjs",
     "dev": "npm run prepare:web && vite",
     "build": "npm run prepare:web && vite build",
     "cap:add:android": "npx cap add android",
