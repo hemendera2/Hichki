@@ -1,0 +1,109 @@
+/* Hichki realtime client bridge v2. Public anon key may be embedded; never put service-role secrets here. */
+(() => {
+  'use strict';
+  const CFG = window.HICHKI_CONFIG || {};
+  const SUPABASE_URL = CFG.supabaseUrl || document.querySelector('meta[name="hichki-supabase-url"]')?.content || '';
+  const SUPABASE_ANON_KEY = CFG.supabaseAnonKey || document.querySelector('meta[name="hichki-supabase-anon-key"]')?.content || '';
+  const DB = 'hichki-local-v2';
+  const STORE = 'outbox';
+  const state = { client: null, user: null, channels: new Map(), listeners: new Set(), online: navigator.onLine, flushing: false };
+  const emit = (type, detail = {}) => { window.dispatchEvent(new CustomEvent(`hichki:${type}`, { detail })); state.listeners.forEach(fn => { try { fn(type, detail); } catch {} }); };
+  const uuid = () => crypto.randomUUID();
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) return resolve(null);
+      const req = indexedDB.open(DB, 1);
+      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE, { keyPath: 'client_id' }); };
+      req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
+    });
+  }
+  async function queuePut(item) {
+    const db = await openDB(); if (!db) return;
+    await new Promise((resolve, reject) => { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(item); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+  }
+  async function queueAll() {
+    const db = await openDB(); if (!db) return [];
+    return new Promise((resolve, reject) => { const tx = db.transaction(STORE, 'readonly'); const req = tx.objectStore(STORE).getAll(); req.onsuccess = () => resolve(req.result || []); req.onerror = () => reject(req.error); });
+  }
+  async function queueDelete(id) {
+    const db = await openDB(); if (!db) return;
+    await new Promise((resolve, reject) => { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).delete(id); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+  }
+
+  async function loadSDK() {
+    if (window.supabase?.createClient) return window.supabase;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'; script.onload = resolve; script.onerror = reject; document.head.appendChild(script);
+    });
+    return window.supabase;
+  }
+  async function init() {
+    if (state.client) return state.client;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) { emit('realtime-error', { code: 'missing_config' }); return null; }
+    try {
+      const sdk = await loadSDK();
+      state.client = sdk.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }, realtime: { params: { eventsPerSecond: 10 } } });
+      const { data } = await state.client.auth.getSession(); state.user = data.session?.user || null;
+      state.client.auth.onAuthStateChange((_event, session) => { state.user = session?.user || null; emit('auth', { user: state.user }); if (state.user) flush(); });
+      emit('ready', { user: state.user });
+      if (state.user) flush();
+      return state.client;
+    } catch (error) { emit('realtime-error', { code: 'init_failed', error }); return null; }
+  }
+  async function signIn(email, password) { const c = await init(); if (!c) throw Error('Hichki backend is not configured'); return c.auth.signInWithPassword({ email, password }); }
+  async function signUp(email, password, displayName = '') {
+    const c = await init(); if (!c) throw Error('Hichki backend is not configured');
+    const result = await c.auth.signUp({ email, password, options: { data: { display_name: displayName } } });
+    return result;
+  }
+  async function signOut() { const c = await init(); if (!c) return; for (const [, ch] of state.channels) await c.removeChannel(ch); state.channels.clear(); return c.auth.signOut(); }
+
+  async function directConversation(otherUserId) {
+    const c = await init(); if (!c || !state.user) throw Error('not_authenticated');
+    const { data, error } = await c.functions.invoke('hichki-conversation-v1', { body: { other_user_id: otherUserId } });
+    if (error) throw error; if (!data?.conversation_id) throw Error(data?.error || 'conversation_create_failed'); return data.conversation_id;
+  }
+  async function sendMessage(conversationId, content, kind = 'text', meta = {}) {
+    const c = await init(); if (!state.user) throw Error('not_authenticated');
+    const text = String(content ?? '').trim(); if (!text && kind === 'text') throw Error('empty_message');
+    const item = { client_id: uuid(), conversation_id: conversationId, content: String(content ?? ''), kind, meta, sender_id: state.user.id, created_at: new Date().toISOString() };
+    if (!state.online) { await queuePut(item); emit('message-queued', item); return { data: item, queued: true, error: null }; }
+    const { data, error } = await c.from('chat_messages').insert(item).select().single();
+    if (error) { await queuePut(item); emit('message-queued', { ...item, error }); return { data: item, queued: true, error }; }
+    emit('message-sent', data); return { data, queued: false, error: null };
+  }
+  async function flush() {
+    if (state.flushing || !state.online || !state.user) return; state.flushing = true;
+    try { const c = await init(); if (!c) return; for (const item of await queueAll()) {
+      const { error } = await c.from('chat_messages').insert(item).select().single();
+      if (!error || /duplicate|unique/i.test(error.message || '')) await queueDelete(item.client_id); else emit('message-retry-needed', { item, error });
+    }} finally { state.flushing = false; }
+  }
+  async function subscribe(conversationId, callback) {
+    const c = await init(); if (!c) throw Error('backend_not_configured');
+    if (state.channels.has(conversationId)) return state.channels.get(conversationId);
+    const channel = c.channel(`hichki:conversation:${conversationId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` }, payload => { callback?.(payload.new); emit('message', payload.new); })
+      .on('presence', { event: 'sync' }, () => emit('presence', channel.presenceState()))
+      .on('presence', { event: 'join' }, p => emit('presence-join', p))
+      .on('presence', { event: 'leave' }, p => emit('presence-leave', p));
+    await channel.subscribe(async status => {
+      if (status === 'SUBSCRIBED' && state.user) await channel.track({ user_id: state.user.id, online_at: new Date().toISOString() });
+      emit('channel', { conversationId, status });
+    });
+    state.channels.set(conversationId, channel); return channel;
+  }
+  async function unsubscribe(conversationId) { const c = state.client; const ch = state.channels.get(conversationId); if (c && ch) { await c.removeChannel(ch); state.channels.delete(conversationId); } }
+  async function registerPushToken(token, platform = 'web', deviceId = uuid()) {
+    const c = await init(); if (!c || !state.user) throw Error('not_authenticated');
+    const { error } = await c.from('push_subscriptions').upsert({ user_id: state.user.id, token, platform, device_id: deviceId, updated_at: new Date().toISOString() }, { onConflict: 'user_id,device_id' });
+    if (error) throw error; emit('push-registered', { platform, deviceId });
+  }
+  function on(fn) { state.listeners.add(fn); return () => state.listeners.delete(fn); }
+  window.HichkiRealtime = { init, signIn, signUp, signOut, directConversation, sendMessage, flush, subscribe, unsubscribe, registerPushToken, on, get user() { return state.user; }, get online() { return state.online; } };
+  window.addEventListener('online', () => { state.online = true; emit('online'); flush(); });
+  window.addEventListener('offline', () => { state.online = false; emit('offline'); });
+  window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flush(); });
+  init().catch(() => {});
+})();
