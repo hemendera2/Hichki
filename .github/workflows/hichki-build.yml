@@ -58,11 +58,6 @@ jobs:
           mkdir -p vendor/hichki-web
           base='https://hichki.netlify.app'
 
-          # Recover only the deterministic inputs consumed by prepare:web.
-          # Do not mirror the deployed page: wget --page-requisites parses
-          # runtime template strings such as ${m.src} as literal URLs and
-          # creates misleading 404s. Optional site files (for example
-          # robots.txt) are deliberately outside the build source contract.
           for file in index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png; do
             curl --fail --silent --show-error --location \
               --output "vendor/hichki-web/$file" \
@@ -98,7 +93,7 @@ jobs:
       - name: Verify build output
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           required=(
             dist/index.html
             dist/manifest.webmanifest
@@ -112,10 +107,15 @@ jobs:
             dist/hichki-ux-polish.css
             dist/icon-512-maskable.png
           )
+          failed=0
           for file in "${required[@]}"; do
             if test ! -s "$file"; then
-              echo "MISSING_OR_EMPTY_BUILD_OUTPUT: $file" >&2
-              exit 1
+              echo "::error::MISSING_OR_EMPTY_BUILD_OUTPUT: $file"
+              failed=1
+            else
+              echo "verified: $file"
             fi
-            echo "verified: $file"
           done
+          echo '--- dist root listing ---'
+          find dist -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
+          exit "$failed"
