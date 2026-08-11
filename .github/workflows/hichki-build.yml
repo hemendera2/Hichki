@@ -15,49 +15,60 @@ env:
   HICHKI_SUPABASE_ANON_KEY: ${{ secrets.HICHKI_SUPABASE_ANON_KEY }}
   HICHKI_VAPID_PUBLIC_KEY: ${{ secrets.HICHKI_VAPID_PUBLIC_KEY }}
 
+concurrency:
+  group: hichki-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install
         run: npm install --no-audit --no-fund
+
       - name: Recover deployed source for isolated build
         shell: bash
         run: |
           set -euo pipefail
-          if test ! -f vendor/hichki-web/index.html; then
-            rm -rf .recovered-hichki
-            mkdir -p .recovered-hichki
-            wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --directory-prefix=.recovered-hichki https://hichki.netlify.app/
-            src=.recovered-hichki/hichki.netlify.app
-            test -f "$src/index.html"
-            mkdir -p vendor/hichki-web
-            cp -a "$src"/. vendor/hichki-web/
-            rm -rf .recovered-hichki
+          if test -f vendor/hichki-web/index.html; then
+            echo 'Vendored Hichki source already present.'
+            exit 0
           fi
-      - name: Ensure build uses vendored source when available
-        shell: python
-        run: |
-          from pathlib import Path
-          p=Path('scripts/prepare-web.mjs')
-          s=p.read_text()
-          marker="const LOCAL_HICHKI='vendor/hichki-web/index.html';"
-          if marker not in s:
-              s=s.replace("const base = 'https://hichki.netlify.app';", marker+"\nconst localRoot='vendor/hichki-web';\n")
-              old="for (const file of requiredRemoteFiles) {"
-              new="if (existsSync(LOCAL_HICHKI)) {\n  await copyFile(LOCAL_HICHKI, 'index.html');\n  for (const file of requiredRemoteFiles.slice(1)) { if (existsSync(`${localRoot}/${file}`)) await copyFile(`${localRoot}/${file}`, `public/${file}`); }\n} else {\n  for (const file of requiredRemoteFiles) {"
-              if old not in s: raise SystemExit('prepare-web download loop not found')
-              s=s.replace(old,new,1)
-              needle="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n}\n"
-              replacement="  await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);\n  }\n}\n"
-              if needle not in s: raise SystemExit('prepare-web loop ending changed')
-              s=s.replace(needle,replacement,1)
-              p.write_text(s)
+
+          rm -rf .recovered-hichki
+          mkdir -p .recovered-hichki
+
+          # The deployed Hichki page is the canonical frontend source until the
+          # original frontend is checked into this repository. Wget may return a
+          # non-zero code for optional remote assets; the index and usable tree
+          # are validated explicitly below instead of treating those as success.
+          set +e
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent \
+            --directory-prefix=.recovered-hichki \
+            https://hichki.netlify.app/
+          wget_status=$?
+          set -e
+
+          src=$(find .recovered-hichki -type f -name index.html -print -quit)
+          if test -z "$src"; then
+            echo "Unable to recover Hichki frontend: no index.html was downloaded (wget status $wget_status)." >&2
+            exit 1
+          fi
+
+          rm -rf vendor/hichki-web
+          mkdir -p vendor/hichki-web
+          root=$(dirname "$src")
+          cp -a "$root"/. vendor/hichki-web/
+          rm -rf .recovered-hichki
+          test -s vendor/hichki-web/index.html
+
       - name: Static JavaScript syntax checks
         shell: bash
         run: |
@@ -72,18 +83,20 @@ jobs:
           node --check hichki-web-push.js
           node --check hichki-push-bridge.js
           node --check native.js
+
       - name: Build production bundle
         run: npm run build
+
       - name: Verify build output
         shell: bash
         run: |
           set -euo pipefail
-          test -f dist/index.html
-          test -f dist/manifest.webmanifest
-          test -f dist/sw.js
-          test -f dist/hichki-realtime.js
-          test -f dist/hichki-chat-api.js
-          test -f dist/hichki-offline-queue.js
-          test -f dist/hichki-music.js
-          test -f dist/hichki-web-push.js
-          test -f dist/hichki-push-bridge.js
+          test -s dist/index.html
+          test -s dist/manifest.webmanifest
+          test -s dist/sw.js
+          test -s dist/hichki-realtime.js
+          test -s dist/hichki-chat-api.js
+          test -s dist/hichki-offline-queue.js
+          test -s dist/hichki-music.js
+          test -s dist/hichki-web-push.js
+          test -s dist/hichki-push-bridge.js
