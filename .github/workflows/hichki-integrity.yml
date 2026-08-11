@@ -13,6 +13,7 @@ permissions:
 jobs:
   static-integrity:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,17 +35,24 @@ jobs:
         run: |
           set -euo pipefail
           while IFS= read -r -d '' f; do node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));" "$f"; done < <(find . -type f -name '*.json' -not -path './.git/*' -print0)
-      - name: Validate required product assets
+      - name: Validate required product assets and security migrations
         shell: bash
         run: |
           set -euo pipefail
-          for f in hichki-realtime.js hichki-chat-api.js hichki-offline-queue.js hichki-music.js hichki-web-push.js hichki-push-bridge.js; do test -f "$f"; done
-          for f in supabase/functions/hichki-conversation-v1/index.ts supabase/functions/hichki-conversation-v2/index.ts supabase/functions/hichki-conversation-v3/index.ts supabase/functions/hichki-push-v3/index.ts supabase/functions/hichki-web-push-v1/index.ts; do test -f "$f"; done
-          test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
-          test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
-          test -f supabase/migrations/20260811090600_hichki_direct_rpc_revoke_authenticated_v2.sql
-          test -f supabase/migrations/20260811090700_hichki_direct_actor_rpc_v1.sql
-          test -f supabase/migrations/20260811090800_hichki_conversation_insert_server_only_v1.sql
+          for f in hichki-realtime.js hichki-chat-api.js hichki-offline-queue.js hichki-music.js hichki-web-push.js hichki-push-bridge.js; do test -s "$f"; done
+          for f in supabase/functions/hichki-conversation-v1/index.ts supabase/functions/hichki-conversation-v2/index.ts supabase/functions/hichki-conversation-v3/index.ts supabase/functions/hichki-push-v3/index.ts supabase/functions/hichki-web-push-v1/index.ts; do test -s "$f"; done
+          for f in \
+            supabase/migrations/20260811070355_hichki_chat_core_v1.sql \
+            supabase/migrations/20260811072044_hichki_message_receipts_v1.sql \
+            supabase/migrations/20260811090600_hichki_direct_rpc_revoke_authenticated_v2.sql \
+            supabase/migrations/20260811090700_hichki_direct_actor_rpc_v1.sql \
+            supabase/migrations/20260811090800_hichki_conversation_insert_server_only_v1.sql \
+            supabase/migrations/20260811105000_hichki_legacy_messages_lockdown_v1.sql \
+            supabase/migrations/20260811131745_hichki_legacy_messages_lockdown_v1.sql \
+            supabase/migrations/20260811131930_hichki_legacy_messages_deny_policy_v1.sql \
+            supabase/migrations/20260811132035_hichki_security_definer_execute_lockdown_v1.sql; do
+            test -s "$f"
+          done
       - name: Guard against service-role leakage in browser assets
         shell: bash
         run: |
