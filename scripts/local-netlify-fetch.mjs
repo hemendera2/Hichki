@@ -17,10 +17,14 @@ const contentTypes = {
 };
 
 const originalFetch = globalThis.fetch;
+const vendorReady = () => existsSync(path.join(root, 'index.html'));
 
+// During CI the deployed artifact is recovered into vendor/hichki-web first.
+// Keep the existing prepare:web fetch-based architecture, but make its
+// interception deterministic and fail closed for missing vendored assets.
 globalThis.fetch = async (input, init) => {
   const url = new URL(typeof input === 'string' ? input : input.url);
-  if (url.hostname !== remoteHost || !existsSync(path.join(root, 'index.html'))) {
+  if (url.hostname !== remoteHost || !vendorReady()) {
     return originalFetch(input, init);
   }
 
@@ -35,6 +39,9 @@ globalThis.fetch = async (input, init) => {
     const type = contentTypes[path.extname(candidate).toLowerCase()] || 'application/octet-stream';
     return new Response(body, { status: 200, headers: { 'content-type': type } });
   } catch {
+    // A vendored source tree is authoritative during an isolated build.
+    // Never silently fall back to the live deployment for a missing asset:
+    // that would make a build depend on changing production state.
     return new Response('Not found', { status: 404 });
   }
 };
