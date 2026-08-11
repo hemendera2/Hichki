@@ -8,13 +8,14 @@ Hichki is a local-first 1:1 chat, journal and music app targeting web, Android a
 
 The repository contains Auth/session persistence, authenticated direct-chat creation, durable message deduplication, Realtime messages/presence/typing, delivered/read receipts, IndexedDB offline retry, profile bootstrap, push-token registration, FCM/Web Push paths, service-worker notification handling, membership-scoped RLS, server-mediated conversation creation, and local music playback.
 
-## Security work
+## Security work completed in this continuation
 
-The active chat path is `chat_messages`; the legacy `public.messages` table has a repository migration intended to revoke Data API privileges and remove its permissive policies. The migration is present in GitHub but its live-application state must be verified independently before treating the legacy surface as closed.
-
-The live Supabase inspection also confirmed that the current database has the expected `chat_messages`, `conversations`, `conversation_members`, `message_receipts`, `profiles`, `push_devices`, and `push_subscriptions` policy families. The live inspection exposed legacy `public.messages` grants in the current database, so this remains a security migration verification item until the migration is applied and rechecked.
-
-The current `hichki-conversation-v3` Edge Function is ACTIVE and JWT-protected. It authenticates the caller, rejects self-recipient requests, verifies the recipient through the admin API, and invokes the actor-bound conversation RPC.
+- Audited the live Hichki Supabase project `mzfwevtiydprksuwalpt`.
+- Found and closed the legacy `public.messages` Data API surface: its `anon`/`authenticated` table privileges are now revoked and its permissive policies are absent.
+- Removed `TRUNCATE`, `REFERENCES`, and `TRIGGER` table privileges from browser roles on the active Hichki tables.
+- Removed client-side `DELETE` privilege from `push_devices` and anonymous `DELETE` privilege from `push_subscriptions`.
+- Rechecked the live database after the migration: no `TRUNCATE`/`REFERENCES`/`TRIGGER` grants remain for `anon` or `authenticated` on the Hichki application tables, and `public.messages` has no client-role grants or policies.
+- The current `hichki-conversation-v3` Edge Function remains ACTIVE and JWT-protected; it authenticates the caller, rejects self-recipient requests, verifies the recipient through the admin API, and invokes the actor-bound conversation RPC.
 
 ## Production verification
 
@@ -24,11 +25,10 @@ GitHub Actions results for the current revision are not available through the co
 
 ## Remaining completion gates
 
-1. Apply and verify the legacy `public.messages` lockdown migration against the intended Supabase project.
-2. Verify no unintended public/anonymous chat data path remains.
-3. Obtain a successful production build/integrity/static verification run.
-4. Verify the recovered frontend and injected runtime integrations as the intended Hichki product.
-5. Exercise authenticated chat, offline retry, Realtime, receipts, presence/typing and push paths with runtime evidence.
-6. Verify Android/iOS native builds for supported targets.
+1. Reconcile the live Supabase migration history with the repository migration set so schema state is reproducible from Git.
+2. Obtain a successful production build/integrity/static verification run.
+3. Verify the recovered frontend and injected runtime integrations as the intended Hichki product.
+4. Exercise authenticated chat, offline retry, Realtime, receipts, presence/typing and push paths with runtime evidence.
+5. Verify Android/iOS native builds for supported targets.
 
-Status: **implementation advanced; production completion not yet proven**.
+Status: **security hardening advanced; production completion not yet proven**.
