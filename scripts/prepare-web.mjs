@@ -7,7 +7,6 @@ const requiredRemoteFiles = [
   'manifest.webmanifest',
   'icon-192.png',
   'icon-512.png',
-  'icon-512-maskable.png',
   'apple-touch-icon.png',
 ];
 
@@ -28,6 +27,11 @@ for (const file of requiredRemoteFiles) {
   const body = Buffer.from(await res.arrayBuffer());
   await writeFile(file === 'index.html' ? 'index.html' : `public/${file}`, body);
 }
+
+// Netlify does not currently publish a separate maskable icon. Reuse the
+// canonical 512px artwork rather than making production builds depend on a
+// nonexistent remote asset. The manifest still advertises it as any/maskable.
+await copyFile('public/icon-512.png', 'public/icon-512-maskable.png');
 
 await writeFile('public/sw.js', fallbackServiceWorker, 'utf8');
 
