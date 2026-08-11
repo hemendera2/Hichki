@@ -23,7 +23,7 @@ Deno.serve(async req=>{
     const admin=createClient(url,service);
     const {data:recipient,error:recipientError}=await admin.auth.admin.getUserById(otherUserId);
     if(recipientError||!recipient.user)throw Error('recipient_not_found');
-    const {data:conversationId,error:rpcError}=await admin.rpc('hichki_create_direct',{p_other_user_id:otherUserId});
+    const {data:conversationId,error:rpcError}=await admin.rpc('hichki_create_direct_for_actor',{p_actor_id:user.id,p_other_user_id:otherUserId});
     if(rpcError)throw rpcError;
     return json({ok:true,conversation_id:conversationId});
   }catch(error){
