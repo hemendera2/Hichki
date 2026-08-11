@@ -30,13 +30,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo "HICHKI_CI_CONTRACT=V3"
           echo "Building commit: $(git rev-parse HEAD)"
+          echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test -s scripts/prepare-web.mjs
+          test -s scripts/verify-build-output.mjs
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
           grep -Fq "scripts/local-netlify-fetch.mjs" package.json
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
+          grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
 
       - uses: actions/setup-node@v4
         with:
@@ -79,6 +83,7 @@ jobs:
           node --check scripts/ensure-vendored-source.mjs
           node --check scripts/inject-hichki-bridge.mjs
           node --check scripts/copy-runtime-assets.mjs
+          node --check scripts/verify-build-output.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
           node --check hichki-offline-queue.js
@@ -92,30 +97,4 @@ jobs:
 
       - name: Verify build output
         shell: bash
-        run: |
-          set -uo pipefail
-          required=(
-            dist/index.html
-            dist/manifest.webmanifest
-            dist/sw.js
-            dist/hichki-realtime.js
-            dist/hichki-chat-api.js
-            dist/hichki-offline-queue.js
-            dist/hichki-music.js
-            dist/hichki-web-push.js
-            dist/hichki-push-bridge.js
-            dist/hichki-ux-polish.css
-            dist/icon-512-maskable.png
-          )
-          failed=0
-          for file in "${required[@]}"; do
-            if test ! -s "$file"; then
-              echo "::error::MISSING_OR_EMPTY_BUILD_OUTPUT: $file"
-              failed=1
-            else
-              echo "verified: $file"
-            fi
-          done
-          echo '--- dist root listing ---'
-          find dist -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
-          exit "$failed"
+        run: node scripts/verify-build-output.mjs
