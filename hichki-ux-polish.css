@@ -4,3 +4,28 @@ button,[role="button"],a,input,textarea,select{touch-action:manipulation}
 button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid currentColor;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media (max-width:640px){button,[role="button"]{min-height:44px;min-width:44px}}
+
+/* ── Appearance Contrast Fix: theme chips stay readable on every theme ── */
+.hk-theme-chip,.theme-choice-btn{
+  background-color:var(--bg-surface,var(--hk-surface,#141417))!important;
+  color:var(--text-primary,var(--hk-text,#f5f2e9))!important;
+}
+.hk-theme-chip .theme-title,.hk-theme-chip .hk-theme-label,.hk-theme-chip .hk-theme-name{
+  color:var(--text-primary,var(--hk-text,#f5f2e9))!important;
+}
+.hk-theme-chip .theme-desc,.hk-theme-chip .hk-theme-sub{
+  color:var(--text-secondary,var(--hk-muted,#a8a4a0))!important;
+}
+
+/* ── Single-Surface Composer Fix: no inner black box around the input ── */
+.chat-textarea,.hk-composer-input,textarea.chat-textarea{
+  outline:none!important;
+  outline-width:0!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+}
+.chat-textarea:focus,.hk-composer-input:focus,textarea.chat-textarea:focus{
+  outline:none!important;
+  border-color:var(--border-focus,var(--hk-accent,#f4c542))!important;
+  box-shadow:0 0 0 2px var(--accent-subtle,var(--hk-accent-soft,rgba(244,197,66,.14)))!important;
+}
