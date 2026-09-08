@@ -2,9 +2,9 @@ name: Hichki build
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
   pull_request:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V8"
+          echo "HICHKI_CI_CONTRACT=V9"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
@@ -44,6 +44,9 @@ jobs:
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-dist-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
+          ! grep -Fq "hichki-offline-queue.js" scripts/inject-hichki-bridge.mjs
+          ! grep -Fq "hichki-offline-queue.js" scripts/copy-runtime-assets.mjs
+          ! grep -Fq "hichki-offline-queue.js" scripts/verify-dist-runtime-assets.mjs
           grep -Fq '"build": "npm run prepare:web && vite build && node scripts/verify-dist-runtime-assets.mjs"' package.json
 
       - uses: actions/setup-node@v4
@@ -91,8 +94,9 @@ jobs:
           node --check scripts/verify-dist-runtime-assets.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
-          node --check hichki-offline-queue.js
           node --check hichki-music.js
+          node --check hichki-library.js
+          node --check hichki-library-ui.js
           node --check hichki-web-push.js
           node --check hichki-push-bridge.js
           node --check native.js
@@ -104,8 +108,10 @@ jobs:
           for file in \
             hichki-realtime.js \
             hichki-chat-api.js \
-            hichki-offline-queue.js \
             hichki-music.js \
+            hichki-library.js \
+            hichki-library-ui.js \
+            hichki-library-ui.css \
             hichki-web-push.js \
             hichki-push-bridge.js \
             hichki-ux-polish.css; do
