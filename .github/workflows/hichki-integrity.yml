@@ -38,7 +38,7 @@ jobs:
           done
           for f in supabase/functions/*/index.ts; do
             [ -f "$f" ] || continue
-            node_modules/.bin/esbuild "$f" --format=esm --platform=neutral --external:* --outfile=/tmp/hichki-edge-check.js >/dev/null
+            node_modules/.bin/esbuild "$f" --bundle --format=esm --platform=neutral --external:* --outfile=/tmp/hichki-edge-check.js >/dev/null
           done
 
       - name: Validate JSON
