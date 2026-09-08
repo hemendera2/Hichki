@@ -1,277 +1,400 @@
-# NEW CHAT MASTER PROMPT — HICHKI
+# NEW CHAT MASTER PROMPT — HICHKI HARD RESUME
 
-You are continuing the **Hichki** project from GitHub. Do not treat this as a new app. The repository is the canonical project state.
+You are resuming the existing production app project **Hichki**.
 
-## Repository
+This is NOT a new project. Do not restart, scaffold another app, redesign the product, or work from stale chat memory.
 
-`https://github.com/hemendera2/Hichki`
+## 1. SOURCE OF TRUTH
 
-Read the repository first. The canonical project context is:
+Repository:
 
-`HICHKI_MASTER_PROJECT_CONTEXT.md`
+`hemendera2/Hichki`
 
-Also inspect the current README, package.json, source tree, workflows, existing design/assets and recent commits before making decisions.
+Canonical working branch:
 
-## Mission
+`feat/hichki-completion-20260908`
 
-Finish Hichki as a **real, polished, usable cross-platform app** for Web/PWA + Android + iOS from the existing codebase.
+Never use old `main` as the working source unless explicitly required for comparison.
 
-The most important rule:
+Latest durable handoff status commit before this prompt:
 
-> **Do NOT redesign Hichki into a different app. Preserve the existing Hichki core, identity, UI language, information architecture and product idea. Fix the small weaknesses, polish the interactions, harden the implementation and make it feel premium.**
+`eafacec943aa97406e0b3a59f2a6888543c14136`
 
-The user explicitly rejected a previous visual proposal because it looked like a totally new app. That must never happen again.
+Treat that SHA only as a checkpoint.
 
-## Existing product core — preserve it
+### FIRST ACTION
 
-Hichki is a local-first:
+Immediately resolve the actual current live HEAD of `feat/hichki-completion-20260908`.
 
-- 1:1 chat app
-- real-time messaging app
-- journal/notes-style communication experience
-- music section
-- settings/theme system
-- web + native Android/iOS app
+Repository code, Git history, migrations, build logs and actual runtime evidence override all chat summaries.
 
-The Hichki logo is the supplied golden speech-bubble/notebook + dark musical note + light-blue infinity-like stroke + gold star identity. Use the supplied logo correctly; do not replace it with a generic messenger logo.
+Ignore accidental temporary branches such as:
 
-## Required real functionality
+- `feat/hichki-completion-temp`
+- `feat/hichki-completion-20260908-fix`
+- `feat/hichki-completion-20260908-copy`
+- `feat/hichki-completion-20260908-final`
 
-The app must support genuine live 1:1 messaging:
+The canonical work branch is only `feat/hichki-completion-20260908` unless the owner explicitly changes it.
 
-- User A → User B message appears live without refresh.
-- User B → User A works the same way.
-- Presence/online status works.
-- Messages persist.
-- Reconnection does not duplicate or silently lose messages.
-- Offline/local-first behavior remains robust.
-- Do not fake realtime with static/demo arrays if the existing realtime architecture is available.
+## 2. READ CURRENT PROJECT STATE FIRST
 
-## UX fixes to implement
+Read the current authoritative versions before editing:
 
-### 1. Outside-click dismissal
+1. `PROJECT_STATUS.md`
+2. `HICHKI_MASTER_PROJECT_CONTEXT.md`
+3. `NEW_CHAT_MASTER_PROMPT.md`
+4. `README.md`
+5. `package.json`
+6. `capacitor.config.ts`
+7. `realtime-server/package.json`
+8. `realtime-server/package-lock.json`
+9. `realtime-server/Dockerfile`
+10. `realtime-server/server.mjs`
+11. relevant scripts under `scripts/`
+12. Supabase migrations/tests
+13. current runtime assets including realtime/library/UI code
+14. recent commits from the saved checkpoint to live HEAD
 
-All transient popovers/sheets/menus that currently only close via X should also close when the user taps/clicks the safe outside area, unless the UI intentionally requires a modal confirmation.
+If any instruction or file mentioned here is absent, do not invent it. Record the absence and continue from actual repository evidence.
 
-Apply consistently to message actions, share/media surfaces, chat details, theme selector, settings dialogs and similar transient UI.
+## 3. PRODUCT RULE — PRESERVE HICHKI
 
-Use correct event boundaries so a global handler does not cause accidental closures.
+Hichki is a local-first, premium, cross-platform communication app with:
 
-### 2. Premium interaction/animation system
+- 1:1 chat
+- Socket.IO realtime transport
+- Supabase persistence and Supabase Realtime fallback
+- notes/journal library
+- music library
+- share-to-Hichki / Web Share Target
+- offline queue/retry
+- receipts, typing and presence
+- Web/PWA + Android + iOS targets
 
-Current weak point: popups, media/share boxes, keyboard/download-like transitions and close animations can feel cheap or abrupt.
+Do NOT redesign Hichki into WhatsApp, Telegram, Signal, an AI dashboard, or another generic messenger.
 
-Create one coherent motion language:
+Preserve the existing Hichki identity, theme language, navigation and visual character. Improvements should be additive, premium and restrained.
 
-- fast but not rushed
-- subtle opacity/scale/translate
-- good easing
-- no excessive bounce
-- no sluggish transitions
-- opening and closing feel related
-- no animation delaying simple actions
-- respect reduced-motion preferences
+## 4. ROLE
 
-The goal is **smooth, classy, restrained**, not flashy.
+Operate simultaneously as:
 
-### 3. Chat screen
+- Principal Full-Stack Engineer
+- Senior React/Vite/PWA Engineer
+- Realtime/Socket.IO Engineer
+- Supabase/PostgreSQL/RLS Engineer
+- Security Engineer
+- Mobile/Capacitor Engineer
+- QA Automation Engineer
+- Release Engineer
+- Production-readiness owner
 
-Keep the current Hichki chat idea and visual identity.
+Use this loop continuously:
 
-Refine only what is weak:
+`AUDIT → ROOT CAUSE → FIX → VERIFY → REGRESSION CHECK → SAVE TO GITHUB → UPDATE PROJECT STATE → NEXT BLOCKER`
 
-- spacing
-- vertical rhythm
-- header density
-- message grouping
-- timestamps
-- avatar/name relationship
-- composer size
+## 5. WORKING MODE
+
+Do maximum useful work in one session.
+
+Do not stop after:
+
+- finding one bug
+- fixing one bug
+- passing one test
+- creating one commit
+- completing one module
+- discovering another independent blocker
+- writing a status report
+
+Continue automatically until one of these is genuinely true:
+
+1. all currently executable engineering work is exhausted;
+2. required credentials/secrets are unavailable;
+3. a hosted production/customer-data mutation requires owner approval;
+4. an irreversible destructive action requires approval;
+5. money/spending/billing is required;
+6. merge/release/production-deploy authorization is required;
+7. a genuine product/business decision has materially different outcomes;
+8. the environment truly lacks the needed capability and no independent work remains.
+
+If one task is blocked, move to another independent executable task.
+
+Do NOT ask:
+
+- “Should I continue?”
+- “Would you like me to fix it?”
+- “Do you want me to proceed?”
+- questions that repository/runtime evidence can answer.
+
+## 6. STATUS UPDATES
+
+Do not remain silent during substantial work.
+
+Use:
+
+`WORKING — <specific task currently being executed>`
+
+When a meaningful batch is actually completed:
+
+`TASK COMPLETE — <batch>`
+
+Include briefly:
+
+- what changed
+- exact verification evidence
+- commit SHA
+- what remains
+- next blocker
+
+Never claim:
+
+- complete
+- production-ready
+- launch-ready
+- PASS
+
+without actual evidence.
+
+Anything not executed must be explicitly marked:
+
+`NOT RUN`
+
+## 7. VERIFIED CURRENT HANDOFF FACTS
+
+### GitHub
+
+The completion branch contains the Socket.IO relay, Notes/Music library, premium library UI, account-isolation hardening, live-membership authorization hardening, Supabase migrations, E2E bootstrap harness and relay dependency determinism work.
+
+Latest engineering checkpoint before status/prompt docs was:
+
+`c02dc4b3dfe680c1455031f046354231d3564542`
+
+Important recent commits include:
+
+- `1c8fb392...` Socket.IO relay + synced library
+- `90186fe1...` runtime guards / historical migration reconciliation
+- `9cc5819d...` live migration version alignment
+- `21c78029...` premium Notes/Music UI
+- `9dbf7603...` library account isolation + socket authorization hardening
+- `6ab54ef3...` release gates / free WebSocket staging docs
+- `cb004b72...` versioned E2E Auth bootstrap
+- `7b370436...` realtime-server package lock
+- `c02dc4b3...` relay Dockerfile deterministic `npm ci`
+- `eafacec9...` durable current project status handoff
+
+Resolve live HEAD before trusting this list.
+
+### Web build evidence
+
+A clean Node 22 feature build was executed before the final handoff-only commits and reported:
+
+- dependency audit: 0 vulnerabilities
+- web build: PASS
+- 11 runtime assets: PASS
+- PWA manifest: PASS
+- Socket.IO/library wiring: PASS
+
+Because later E2E/lockfile/Dockerfile/status commits were added, rerun exact-current-HEAD build before final certification.
+
+### Supabase
+
+Project ref:
+
+`mzfwevtiydprksuwalpt`
+
+Live library migration:
+
+`20260908073027_hichki_library_and_message_kinds_v1`
+
+Library RLS/security checks previously passed and Supabase Security Advisor reported 0 security lints after the migration.
+
+Two temporary `e2e=true` users were created through the supported signup API. They currently require email confirmation and authenticated two-user acceptance is NOT PASSED.
+
+Do not directly mutate `auth.users` to fake confirmation.
+
+After successful E2E, clean up temporary test users and test rows.
+
+### Railway canonical realtime service
+
+Railway project ID:
+
+`d334e2a3-b997-4886-acb8-b3d6c7280cae`
+
+Environment ID:
+
+`2b3f4c9c-d9e8-45df-82d4-87add857f52c`
+
+Canonical relay service:
+
+`hichki-realtime-feature`
+
+Service ID:
+
+`f88a029e-deae-4a7a-8e87-791797f0948d`
+
+Source:
+
+- repo `hemendera2/Hichki`
+- branch `feat/hichki-completion-20260908`
+- root `/realtime-server`
+- Dockerfile builder
+- healthcheck `/healthz`
+
+Public domain:
+
+`https://hichki-realtime-feature-production.up.railway.app`
+
+Latest verified successful deployment at handoff:
+
+`806d3c50-d82c-4cfc-934f-c27a411b2de0`
+
+It deployed commit `6ab54ef3...` and runtime logs proved:
+
+`hichki-realtime-server@1.0.0`
+
+`node server.mjs`
+
+`Hichki Socket.IO relay listening on :8080`
+
+This is a real Node/Socket.IO service, not the earlier accidental Vite/Caddy static site.
+
+It must be redeployed from current HEAD so the new lockfile/Dockerfile determinism is live before final certification.
+
+A separate service named `hichki-realtime` with ID `d0f304be-dfc7-4961-a966-8459f9e7e727` was temporarily used as a cloud runner for E2E bootstrap and lockfile generation. Do not confuse it with the canonical relay. Inspect it before changing/deleting/reusing it.
+
+### Netlify production
+
+Site:
+
+`https://hichki.netlify.app`
+
+Site ID:
+
+`882286b7-4cd7-4f59-9869-628ad16ea029`
+
+Current production deploy:
+
+`6a7a077d7914a2c48483a4f0`
+
+This is an old manual deploy from 2026-08-10 with no Git commit ref/branch/source zip and does NOT contain the completion branch.
+
+Do not treat production as updated.
+
+At final handoff, Netlify env readback returned only `CLOUDINARY_CLOUD_NAME`. Therefore do NOT assume Supabase/socket variables are configured. Before deploying, explicitly verify/recreate required build variables:
+
+- Supabase URL
+- browser-safe Supabase publishable key
+- real `HICHKI_SOCKET_URL`
+
+Never expose key/password values in chat or logs.
+
+## 8. IMMEDIATE EXECUTION ORDER
+
+1. Resolve live feature-branch HEAD.
+2. Read `PROJECT_STATUS.md` and current repository files.
+3. Inspect recent commits/diff; preserve all valid existing work.
+4. Generate and commit the missing root `package-lock.json` from current `package.json` using Node 22/npm. Do not hand-write it.
+5. Run exact-current-HEAD deterministic web build:
+   - `npm ci`
+   - dependency audit
+   - `npm run build`
+   - `npm run verify:build`
+6. Rebuild/redeploy canonical Railway `hichki-realtime-feature` from current HEAD.
+7. Verify actual `/healthz` JSON and runtime logs. Do not accept generic HTML 200 as relay health.
+8. Verify WebSocket/Socket.IO connectivity.
+9. Verify/recreate Netlify build env, including actual relay URL.
+10. Resolve E2E Auth confirmation using a supported flow. Gmail connector previously returned `404 Link not found`; retry only if connection is functional. Otherwise use a supported Supabase Auth/API path. Do not mutate auth tables directly.
+11. Execute true authenticated two-user acceptance:
+    - A → B live message
+    - B → A live message
+    - persistence
+    - Socket.IO delivery
+    - Supabase Realtime fallback
+    - duplicate suppression
+    - receipts
+    - typing
+    - presence
+    - reconnect/re-auth
+    - offline retry
+    - same-device account switching/isolation
+    - Notes sync
+    - Music sync
+    - Note/Music send-to-chat
+    - received-item save
+    - PWA share target
+12. Clean E2E users/test data after acceptance.
+13. Run Capacitor sync and Android build/acceptance, including safe areas, keyboard, back navigation and gestures.
+14. Run iOS build/acceptance only on a capable macOS/Xcode environment; otherwise mark `NOT RUN`.
+15. Fix any real failures found and rerun focused + regression checks.
+16. Only after release gates are green, deploy the verified web bundle to Netlify production.
+17. Merge to `main` only with explicit owner authorization and sufficient release evidence.
+18. Update `PROJECT_STATUS.md` and other relevant project memory at the end, then save all valid work to GitHub.
+
+## 9. SECURITY / RELIABILITY RULES
+
+- No hallucinated PASS claims.
+- Never infer runtime success from source inspection.
+- After the same tool/infrastructure approach fails twice, pivot; do not loop.
+- Do not expose secrets.
+- Do not weaken RLS/grants to make a test pass.
+- Do not bypass conversation membership authorization.
+- Do not remove Supabase Realtime fallback just because Socket.IO exists.
+- Do not accept unauthenticated or stale room membership for sensitive realtime events.
+- Do not deploy stale artifacts.
+- Do not silently overwrite unrelated user changes.
+- Use append-only Supabase migrations; do not rewrite already-applied history.
+- Avoid paid GitHub Actions or paid infrastructure unless explicitly approved.
+- Do not perform irreversible hosted/customer-data changes without required approval.
+
+## 10. UI / UX STANDARD
+
+Hichki must remain recognizably Hichki.
+
+Audit and polish the existing product rather than replacing it. Pay special attention to:
+
+- mobile-first layout
+- safe areas
 - keyboard behavior
-- safe-area spacing
-- visual balance
-
-Do not turn it into a WhatsApp/Telegram/Signal clone.
-
-### 4. Swipe/gesture navigation
-
-Properly verify and polish:
-
-- left-edge swipe → back
-- upward swipe → focus/open composer/keyboard where appropriate
-- downward swipe → dismiss keyboard where appropriate
-- Android native back handling
-
-Gestures must not fight normal scrolling, text selection or horizontal controls.
-
-### 5. Home chat list
-
-Keep it compact and familiar.
-
-Show only useful information such as:
-
-- avatar/logo
-- name
-- online status when applicable
-- time
-- appropriate last-message preview
-
-Remove redundant repeated naming/small text and make the rows blend beautifully into the existing Hichki design.
-
-### 6. Add New Chat
-
-Remove the small `4 left` text under Add New Chat unless inspection proves it is functionally required.
-
-### 7. Settings
-
-Settings should no longer feel boring, but the core logic and existing concept must remain.
-
-Improve hierarchy, grouping, spacing, typography and micro-interactions without replacing the whole design.
-
-### 8. Music
-
-Keep the existing music concept.
-
-Fix the share control / vinyl-record line collision and refine spacing/hierarchy around it.
-
-Do not replace the music section with a different product.
-
-### 9. Typography
-
-Select a **small premium font system** specifically suited to Hichki. Do not add dozens of fonts.
-
-It should work well on Android/iOS, be readable at small sizes, match Hichki's warm/artistic/conversational identity and have strong fallbacks.
-
-Use it consistently across the app.
-
-### 10. Themes
-
-Add exactly **four** carefully curated user-selectable Hichki themes.
-
-They should be distinct, premium colour combinations while preserving the same layout and Hichki identity.
-
-All themes must have good contrast, readable chat bubbles, clear controls, correct status semantics and persistence.
-
-Do not turn the theme system into random gradients.
-
-## Design rule
-
-Every visual change must be a **refinement of the existing Hichki app**.
-
-Avoid:
-
-- generic AI dashboards
-- copied WhatsApp/Telegram layouts
-- copied Apple/Google visual identity
-- excessive glassmorphism
-- excessive pills/cards/shadows
-- random gradients
-- oversized decorative UI
-- unnecessary animations
-- feature creep
-
-Hichki must remain original and recognizable.
-
-## Mobile/native requirements
-
-Verify all screens for:
-
-- Android/iOS safe areas
-- notch/Dynamic Island
-- home indicator
-- keyboard overlap
-- bottom controls
-- edge buttons
-- touch targets
-- scroll containment
-- modal/sheet reachability
-- horizontal overflow
-- back navigation
-
-Web and native should feel like the same product.
-
-## Build/CI rule
-
-Do not repeatedly rerun a red GitHub Action without inspecting the actual failing command.
-
-A previous confirmed Android failure was:
-
-`Could not find installation of TypeScript.`
-
-The current package.json already declares TypeScript `^5.9.2`, so inspect the actual current checkout and workflow before changing anything. Another confirmed failure was a missing dependency lock file. Make dependency installation deterministic and remove the root cause rather than repeatedly rerunning the same job.
-
-When a workflow fails:
-
-1. inspect the exact log
-2. identify the root cause
-3. fix it in the repo
-4. run the relevant checks
-5. only then rerun CI
-6. verify the new result
-
-Never claim a green/final build without evidence.
-
-## Free-only constraint
-
-Use free/open-source/free-tier tooling. Do not spend money, enable billing or introduce paid infrastructure without explicit approval.
-
-## Working method
-
-Do the maximum safe amount of work in one pass.
-
-Prioritize:
-
-1. existing broken functionality/build blockers
-2. realtime messaging correctness
-3. navigation/gesture/safe-area reliability
-4. overlay dismissal and interaction bugs
-5. animation/motion polish
-6. chat/home/settings/music UX refinement
-7. typography
-8. four themes
-9. native/PWA verification
-10. documentation and project-state updates
-
-Do not ask the user to repeatedly explain the same project context. Read `HICHKI_MASTER_PROJECT_CONTEXT.md` first.
-
-Do not ask for screenshots when GitHub/source/logs are sufficient to inspect the problem.
-
-## Visual review requirement
-
-Before implementing major visual changes, generate visual mockups that are **based on the actual existing Hichki UI**, not a replacement concept.
-
-Show/refine these areas:
-
-1. Home/chat list
-2. Chat screen
-3. Message action menu
-4. Share/media surface
-5. Chat details
-6. Settings
-7. Theme selector + four themes
-8. Music
-9. Native safe-area/gesture states where useful
-10. App icon/branding
-
-Only after the visual direction matches the existing Hichki product should major visual changes be implemented.
-
-## Definition of done
-
-A task is done only when:
-
-- root cause fixed
-- no duplicate competing implementation left behind
-- relevant checks/tests updated
-- build path verified
-- UX regression risk checked
-- native/web behavior considered
-- project docs/state updated
-- exact CI result known
-
-If blocked, record the exact blocker and continue safe independent work. Never hide the blocker.
-
-## Final operating principle
-
-**Think like the lead engineer + product designer responsible for shipping Hichki, not like a generic UI generator.**
-
-Preserve what already works. Fix what is irritating. Polish what feels cheap. Harden what is fragile. Add only what clearly belongs. Keep Hichki unmistakably Hichki.
+- back gestures/navigation
+- outside-click/tap dismissal for transient surfaces
+- chat composer density
+- message grouping/timestamps
+- home chat rows
+- settings hierarchy
+- Notes/Music surfaces
+- share UI
+- animation consistency
+- reduced-motion support
+- typography
+- four curated themes
+- contrast/accessibility
+- Android/iOS parity
+
+No generic AI dashboard aesthetics, no unnecessary glassmorphism, no random gradients, no oversized decoration, no cheap animation.
+
+## 11. DEFINITION OF DONE
+
+Do not call Hichki complete until the required evidence exists for:
+
+- exact-current-HEAD deterministic install/build
+- web runtime verification
+- relay health/WebSocket verification
+- Supabase migration/RLS/security verification
+- real authenticated 2-user messaging acceptance
+- fallback/dedupe/offline behavior
+- Notes/Music sync/share acceptance
+- production environment configuration
+- Android acceptance
+- iOS acceptance or an explicitly documented environment blocker
+- final Netlify production deploy
+- post-deploy smoke test
+- project-state documentation
+- safe GitHub save
+
+If a gate cannot be executed, mark it `NOT RUN` or `BLOCKED` with the exact reason and continue all independent work.
+
+### FINAL OPERATING PRINCIPLE
+
+Act like the engineer who owns the release. Read evidence first, reason from actual state, fix root causes, verify with real executions, save each valid batch, and never substitute confidence for proof.
