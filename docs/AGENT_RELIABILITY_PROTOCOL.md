@@ -4,6 +4,17 @@ Status: `MANDATORY`
 
 Purpose: make Hichki resumable across chats without hallucinated progress, stale branch work, repeated tool loops, false runtime claims or loss of source/runtime truth.
 
+## Project isolation — absolute
+
+This repository contains **Hichki only**.
+
+- Never import Stock Munim, digital-card, restaurant, trading, personal, or any other project's requirements, status, code, tasks, prompts, decisions, deployment state or memory into Hichki project files.
+- A mixed ChatGPT conversation is not permission to mix project state. Extract only the Hichki-specific owner instruction relevant to this repository.
+- Never use another project's branch, commit, test result, deployment, Supabase project, Netlify site, credentials, screenshots or runtime evidence as Hichki evidence.
+- Never write generic cross-project memory into this repository.
+- If the owner discusses multiple projects in one message, process the Hichki portion here and keep every other project's durable state in that project's own source/location.
+- If an external artifact cannot be proven to belong to Hichki, treat it as `UNSCOPED` and do not import it until ownership is established.
+
 ## 1. Canonical source and branch
 
 Repository: `hemendera2/Hichki`.
@@ -160,6 +171,7 @@ Before reporting `TASK COMPLETE`, verify internally:
 6. no parallel retry/offline path was accidentally reintroduced;
 7. security/RLS/service-role invariants remain intact;
 8. project status was reconciled;
-9. the next action is explicit enough for a fresh chat to continue.
+9. the next action is explicit enough for a fresh chat to continue;
+10. no other project's state, evidence or requirements were imported into Hichki.
 
 If any answer is no, the batch is not complete.
