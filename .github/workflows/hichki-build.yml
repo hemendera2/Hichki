@@ -13,6 +13,7 @@ permissions:
 env:
   HICHKI_SUPABASE_URL: ${{ secrets.HICHKI_SUPABASE_URL }}
   HICHKI_SUPABASE_ANON_KEY: ${{ secrets.HICHKI_SUPABASE_ANON_KEY }}
+  HICHKI_SOCKET_URL: ${{ secrets.HICHKI_SOCKET_URL }}
   HICHKI_VAPID_PUBLIC_KEY: ${{ secrets.HICHKI_VAPID_PUBLIC_KEY }}
 
 concurrency:
@@ -30,21 +31,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V12"
+          echo "HICHKI_CI_CONTRACT=V13"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test -s package-lock.json
+          test -s realtime-server/package-lock.json
+          test -s vendor/hichki-web/index.html
+          test -s hichki-cloud-ui.js
           test -s scripts/prepare-web.mjs
+          test -s scripts/retire-legacy-runtime.mjs
           test -s scripts/copy-runtime-assets.mjs
           test -s scripts/verify-build-output.mjs
           test -s scripts/verify-dist-runtime-assets.mjs
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
           grep -Fq "scripts/local-netlify-fetch.mjs" package.json
+          grep -Fq "scripts/retire-legacy-runtime.mjs" package.json
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-dist-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
+          grep -Fq "hichki-cloud-ui.js" scripts/inject-hichki-bridge.mjs
+          grep -Fq "hichki-cloud-ui.js" scripts/copy-runtime-assets.mjs
           ! grep -Fq "hichki-offline-queue.js" scripts/inject-hichki-bridge.mjs
           ! grep -Fq "hichki-offline-queue.js" scripts/copy-runtime-assets.mjs
           ! grep -Fq "hichki-offline-queue.js" scripts/verify-dist-runtime-assets.mjs
@@ -55,7 +63,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install
+      - name: Install web dependencies
         run: npm ci --no-audit --no-fund
 
       - name: Verify committed root lock
@@ -65,30 +73,14 @@ jobs:
           node -e "const p=require('./package-lock.json'); if(p.name!=='hichki'||p.version!=='2.6.0'||p.lockfileVersion!==3) process.exit(1)"
           test -z "$(git status --porcelain package-lock.json)"
 
-      - name: Recover deployed source for isolated build
+      - name: Verify realtime server deterministic install
         shell: bash
         run: |
           set -euo pipefail
-          if test -s vendor/hichki-web/index.html; then
-            echo 'Vendored Hichki source already present.'
-            exit 0
-          fi
-
-          rm -rf vendor/hichki-web
-          mkdir -p vendor/hichki-web
-          base='https://hichki.netlify.app'
-
-          for file in index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png; do
-            curl --fail --silent --show-error --location \
-              --output "vendor/hichki-web/$file" \
-              "$base/$file"
-          done
-
-          test -s vendor/hichki-web/index.html
-          test -s vendor/hichki-web/manifest.webmanifest
-          test -s vendor/hichki-web/icon-192.png
-          test -s vendor/hichki-web/icon-512.png
-          test -s vendor/hichki-web/apple-touch-icon.png
+          cd realtime-server
+          npm ci --no-audit --no-fund
+          npm run check
+          test -z "$(git status --porcelain package-lock.json)"
 
       - name: Static JavaScript syntax checks
         shell: bash
@@ -97,12 +89,14 @@ jobs:
           node --check scripts/prepare-web.mjs
           node --check scripts/local-netlify-fetch.mjs
           node --check scripts/ensure-vendored-source.mjs
+          node --check scripts/retire-legacy-runtime.mjs
           node --check scripts/inject-hichki-bridge.mjs
           node --check scripts/copy-runtime-assets.mjs
           node --check scripts/verify-build-output.mjs
           node --check scripts/verify-dist-runtime-assets.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
+          node --check hichki-cloud-ui.js
           node --check hichki-music.js
           node --check hichki-library.js
           node --check hichki-library-ui.js
@@ -117,6 +111,7 @@ jobs:
           for file in \
             hichki-realtime.js \
             hichki-chat-api.js \
+            hichki-cloud-ui.js \
             hichki-music.js \
             hichki-library.js \
             hichki-library-ui.js \
