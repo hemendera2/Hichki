@@ -2,11 +2,11 @@ name: Recover Hichki deployed source
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 2 * * 0'
+  push:
+    branches: [feat/hichki-completion-20260908]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: hichki-source-recovery
@@ -19,54 +19,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check whether deployed source is already vendored
-        id: source
-        shell: bash
-        run: |
-          if test -f vendor/hichki-web/index.html; then
-            echo 'missing=false' >> "$GITHUB_OUTPUT"
-          else
-            echo 'missing=true' >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Mirror deployed Hichki artifact
-        if: steps.source.outputs.missing == 'true'
+      - name: Recover deterministic public base source once
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .recovered-hichki
-          mkdir -p .recovered-hichki
-          set +e
-          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent \
-            --directory-prefix=.recovered-hichki \
-            https://hichki.netlify.app/
-          status=$?
-          set -e
-          src=$(find .recovered-hichki -type f -name index.html -print -quit)
-          if test -z "$src"; then
-            echo "Source recovery failed: no index.html was downloaded (wget status $status)." >&2
-            exit 1
+          if test -s vendor/hichki-web/index.html; then
+            echo 'Vendored Hichki base source already present.'
+            exit 0
           fi
-          rm -rf recovered-hichki
-          mkdir -p recovered-hichki
-          cp -a "$(dirname "$src")"/. recovered-hichki/
-          test -s recovered-hichki/index.html
-          rm -rf .recovered-hichki
 
-      - name: Validate recovered source
+          rm -rf vendor/hichki-web
+          mkdir -p vendor/hichki-web
+          base='https://hichki.netlify.app'
+          for file in index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png; do
+            curl --fail --silent --show-error --location \
+              --output "vendor/hichki-web/$file" \
+              "$base/$file"
+          done
+
+          test -s vendor/hichki-web/index.html
+          test -s vendor/hichki-web/manifest.webmanifest
+          test -s vendor/hichki-web/icon-192.png
+          test -s vendor/hichki-web/icon-512.png
+          test -s vendor/hichki-web/apple-touch-icon.png
+
+          git add vendor/hichki-web
+          if git diff --cached --quiet; then
+            echo 'No recovered source changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build: vendor deployed Hichki base source [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Verify vendored base source
         shell: bash
         run: |
           set -euo pipefail
-          if test "${{ steps.source.outputs.missing }}" = 'true'; then
-            test -s recovered-hichki/index.html
-          else
-            test -s vendor/hichki-web/index.html
-          fi
-
-      - name: Publish recovered source artifact
-        if: steps.source.outputs.missing == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: hichki-deployed-source
-          path: recovered-hichki/
-          if-no-files-found: error
+          test -s vendor/hichki-web/index.html
+          test -s vendor/hichki-web/manifest.webmanifest
+          test -s vendor/hichki-web/icon-192.png
+          test -s vendor/hichki-web/icon-512.png
+          test -s vendor/hichki-web/apple-touch-icon.png
