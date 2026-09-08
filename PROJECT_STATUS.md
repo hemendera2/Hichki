@@ -6,10 +6,18 @@ _Last verified against GitHub, Supabase and Netlify: 2026-09-08_
 
 - Authoritative repository: `hemendera2/Hichki`
 - Main checkpoint before this continuation: `da78edc35a1703723dc08e884bf342a542e1f7f6`
-- Active completion branch: `feat/hichki-completion-20260908`
-- First completion commit: `1c8fb392472a3122e65a1b2f74ae1cb1d1a37852`
+- Active engineering completion branch: `feat/hichki-completion-20260908-final`
+- Completion source checkpoint before reliability hardening: `90186fe16d28899bc89d1ea9a6d1ae691c558c11`
+- Mandatory agent instructions: `AGENTS.md`
+- Mandatory reliability protocol: `docs/AGENT_RELIABILITY_PROTOCOL.md`
 
-The working branch is intentionally separate from `main` so ordinary source saves do not trigger the repository's main-branch GitHub Actions workflows while engineering verification is still in progress.
+The working branch is intentionally separate from `main` so engineering verification can continue without misrepresenting incomplete work as a release. Other temporary/copy completion branch names are historical working artifacts and must not be selected merely because their names look newer. Resolve this active branch HEAD again at the start of every session.
+
+## Agent reliability hardening
+
+Hichki now has repository-level mandatory agent instructions and an anti-hallucination/recovery protocol. New sessions must resolve current HEAD, read repository state before chat summaries, use explicit `SOURCE-CONFIRMED / TEST-PASS / RUNTIME-PASS / DEPLOYED / NOT-RUN / HISTORICAL / BLOCKED` evidence labels, pivot after two equivalent failed approaches, and checkpoint enough state for a new chat to resume without asking the owner to repeat history.
+
+This hardening is project-process protection. It does not itself certify any remaining runtime/release gate.
 
 ## Completed in this continuation
 
