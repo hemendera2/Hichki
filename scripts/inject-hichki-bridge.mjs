@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { HICHKI_PUBLIC_RUNTIME_CONFIG } from './public-runtime-config.mjs';
 const path='index.html';let html=await readFile(path,'utf8');const marker='HICHKI_REALTIME_BRIDGE_V9';
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');const supabaseUrl=process.env.HICHKI_SUPABASE_URL||process.env.SUPABASE_URL||'';const supabaseAnonKey=process.env.HICHKI_SUPABASE_ANON_KEY||process.env.SUPABASE_ANON_KEY||'';const socketUrl=process.env.HICHKI_SOCKET_URL||'';const vapidPublic=process.env.HICHKI_VAPID_PUBLIC_KEY||process.env.VAPID_PUBLIC_KEY||'';
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');const supabaseUrl=process.env.HICHKI_SUPABASE_URL||process.env.SUPABASE_URL||HICHKI_PUBLIC_RUNTIME_CONFIG.supabaseUrl;const supabaseAnonKey=process.env.HICHKI_SUPABASE_ANON_KEY||process.env.SUPABASE_ANON_KEY||HICHKI_PUBLIC_RUNTIME_CONFIG.supabasePublishableKey;const socketUrl=process.env.HICHKI_SOCKET_URL||HICHKI_PUBLIC_RUNTIME_CONFIG.socketUrl;const vapidPublic=process.env.HICHKI_VAPID_PUBLIC_KEY||process.env.VAPID_PUBLIC_KEY||'';
 if(!html.includes('hichki-supabase-anon-key')){const config=`${supabaseUrl&&supabaseAnonKey?`<meta name="hichki-supabase-url" content="${esc(supabaseUrl)}"><meta name="hichki-supabase-anon-key" content="${esc(supabaseAnonKey)}">`:''}${socketUrl?`<meta name="hichki-socket-url" content="${esc(socketUrl)}">`:''}${vapidPublic?`<meta name="hichki-vapid-public-key" content="${esc(vapidPublic)}">`:''}`;if(config)html=html.replace('</head>',`${config}</head>`)}
 if(!html.includes('hichki-ux-polish.css'))html=html.replace('</head>','<link rel="stylesheet" href="/hichki-ux-polish.css"></head>');
 if(!html.includes(marker)){const bridge=`<!-- ${marker} -->
