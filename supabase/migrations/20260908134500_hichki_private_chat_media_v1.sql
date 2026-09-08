@@ -79,6 +79,24 @@ create policy hichki_chat_media_insert_member_owner
     and split_part(name, '/', 3) <> ''
   );
 
+drop policy if exists hichki_chat_media_update_owner on storage.objects;
+create policy hichki_chat_media_update_owner
+  on storage.objects
+  for update
+  to authenticated
+  using (
+    bucket_id = 'hichki-chat-media'
+    and public.hichki_media_conversation_id(name) is not null
+    and public.hichki_is_member(public.hichki_media_conversation_id(name))
+    and split_part(name, '/', 2) = (select auth.uid())::text
+  )
+  with check (
+    bucket_id = 'hichki-chat-media'
+    and public.hichki_media_conversation_id(name) is not null
+    and public.hichki_is_member(public.hichki_media_conversation_id(name))
+    and split_part(name, '/', 2) = (select auth.uid())::text
+  );
+
 drop policy if exists hichki_chat_media_delete_owner on storage.objects;
 create policy hichki_chat_media_delete_owner
   on storage.objects
