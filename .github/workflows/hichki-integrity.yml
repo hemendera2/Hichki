@@ -2,13 +2,17 @@ name: Hichki integrity
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
   pull_request:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: hichki-integrity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static-integrity:
@@ -19,29 +23,60 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate JavaScript syntax
+          cache: npm
+
+      - name: Install deterministic toolchain
+        run: npm ci --include=dev --no-audit --no-fund
+
+      - name: Validate JavaScript and Edge Function syntax
         shell: bash
         run: |
           set -euo pipefail
-          for f in scripts/*.mjs *.js realtime-server/*.mjs supabase/functions/*/index.ts; do
+          for f in scripts/*.mjs *.js realtime-server/*.mjs; do
             [ -f "$f" ] || continue
-            case "$f" in
-              *.mjs|*.js) node --check "$f" ;;
-              *.ts) npx --yes esbuild "$f" --format=esm --platform=neutral --outfile=/tmp/hichki-check.js ;;
-            esac
+            node --check "$f"
           done
+          for f in supabase/functions/*/index.ts; do
+            [ -f "$f" ] || continue
+            node_modules/.bin/esbuild "$f" --format=esm --platform=neutral --external:* --outfile=/tmp/hichki-edge-check.js >/dev/null
+          done
+
       - name: Validate JSON
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' f; do node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));" "$f"; done < <(find . -type f -name '*.json' -not -path './.git/*' -print0)
+          while IFS= read -r -d '' f; do
+            node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));" "$f"
+          done < <(find . -type f -name '*.json' -not -path './.git/*' -not -path './node_modules/*' -print0)
+
       - name: Validate required product assets and security migrations
         shell: bash
         run: |
           set -euo pipefail
-          for f in hichki-realtime.js hichki-chat-api.js hichki-offline-queue.js hichki-music.js hichki-library.js hichki-web-push.js hichki-push-bridge.js; do test -s "$f"; done
-          for f in realtime-server/package.json realtime-server/server.mjs; do test -s "$f"; done
-          for f in supabase/functions/hichki-conversation-v1/index.ts supabase/functions/hichki-conversation-v2/index.ts supabase/functions/hichki-conversation-v3/index.ts supabase/functions/hichki-push-v3/index.ts supabase/functions/hichki-web-push-v1/index.ts; do test -s "$f"; done
+          for f in \
+            hichki-realtime.js \
+            hichki-chat-api.js \
+            hichki-cloud-ui.js \
+            hichki-music.js \
+            hichki-library.js \
+            hichki-library-ui.js \
+            hichki-library-ui.css \
+            hichki-web-push.js \
+            hichki-push-bridge.js \
+            scripts/public-runtime-config.mjs \
+            scripts/verify-release-config.mjs \
+            netlify.toml; do
+            test -s "$f"
+          done
+          for f in realtime-server/package.json realtime-server/package-lock.json realtime-server/server.mjs; do test -s "$f"; done
+          for f in \
+            supabase/functions/hichki-conversation-v1/index.ts \
+            supabase/functions/hichki-conversation-v2/index.ts \
+            supabase/functions/hichki-conversation-v3/index.ts \
+            supabase/functions/hichki-push-v3/index.ts \
+            supabase/functions/hichki-web-push-v1/index.ts; do
+            test -s "$f"
+          done
           for f in \
             supabase/migrations/20260811070355_hichki_chat_core_v1.sql \
             supabase/migrations/20260811072044_hichki_message_receipts_v1.sql \
@@ -54,10 +89,13 @@ jobs:
             supabase/migrations/20260811131930_hichki_legacy_messages_deny_policy_v1.sql \
             supabase/migrations/20260811132035_hichki_security_definer_execute_lockdown_v1.sql \
             supabase/migrations/20260908073027_hichki_library_and_message_kinds_v1.sql \
-            supabase/tests/database/library_security.sql; do
+            supabase/migrations/20260908141209_hichki_private_chat_media_v1.sql \
+            supabase/tests/database/library_security.sql \
+            supabase/tests/database/private_chat_media_security.sql; do
             test -s "$f"
           done
-      - name: Guard against service-role leakage in browser assets
+
+      - name: Guard against privileged-key leakage in browser assets
         shell: bash
         run: |
           set -euo pipefail

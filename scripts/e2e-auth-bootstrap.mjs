@@ -1,5 +1,7 @@
-const supabaseUrl = String(process.env.SUPABASE_URL || process.env.HICHKI_SUPABASE_URL || '').replace(/\/$/, '');
-const publishableKey = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.HICHKI_SUPABASE_ANON_KEY || '');
+import { HICHKI_PUBLIC_RUNTIME_CONFIG } from './public-runtime-config.mjs';
+
+const supabaseUrl = String(process.env.SUPABASE_URL || process.env.HICHKI_SUPABASE_URL || HICHKI_PUBLIC_RUNTIME_CONFIG.supabaseUrl || '').replace(/\/$/, '');
+const publishableKey = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.HICHKI_SUPABASE_ANON_KEY || HICHKI_PUBLIC_RUNTIME_CONFIG.supabasePublishableKey || '');
 
 const users = [
   {
