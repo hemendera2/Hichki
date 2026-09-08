@@ -2,11 +2,11 @@ name: Recover Hichki deployed source
 
 on:
   workflow_dispatch:
-  push:
-    branches: [feat/hichki-completion-20260908]
+  schedule:
+    - cron: '17 2 * * 0'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: hichki-source-recovery
@@ -19,41 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Recover deterministic public base source once
-        shell: bash
-        run: |
-          set -euo pipefail
-          if test -s vendor/hichki-web/index.html; then
-            echo 'Vendored Hichki base source already present.'
-            exit 0
-          fi
-
-          rm -rf vendor/hichki-web
-          mkdir -p vendor/hichki-web
-          base='https://hichki.netlify.app'
-          for file in index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png; do
-            curl --fail --silent --show-error --location \
-              --output "vendor/hichki-web/$file" \
-              "$base/$file"
-          done
-
-          test -s vendor/hichki-web/index.html
-          test -s vendor/hichki-web/manifest.webmanifest
-          test -s vendor/hichki-web/icon-192.png
-          test -s vendor/hichki-web/icon-512.png
-          test -s vendor/hichki-web/apple-touch-icon.png
-
-          git add vendor/hichki-web
-          if git diff --cached --quiet; then
-            echo 'No recovered source changes.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'build: vendor deployed Hichki base source [skip ci]'
-          git push origin "HEAD:${GITHUB_REF_NAME}"
-
-      - name: Verify vendored base source
+      - name: Check vendored Hichki base source
         shell: bash
         run: |
           set -euo pipefail
@@ -62,3 +28,4 @@ jobs:
           test -s vendor/hichki-web/icon-192.png
           test -s vendor/hichki-web/icon-512.png
           test -s vendor/hichki-web/apple-touch-icon.png
+          echo 'Vendored Hichki base source is present and authoritative.'
