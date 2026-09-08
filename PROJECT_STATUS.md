@@ -1,131 +1,93 @@
 # Hichki — Current Project Status
 
-_Last reconciled: 2026-09-08. Repository/runtime evidence overrides older chat summaries._
+_Last reconciled: 2026-09-08 against GitHub, Supabase, Railway and Netlify runtime evidence. Repository/runtime evidence overrides older chat summaries._
 
 ## Source of truth
 
 - Repository: `hemendera2/Hichki`
-- Active completion branch: `feat/hichki-completion-20260908`
-- Main remains on the older product state and MUST NOT be used as the working source.
-- Latest engineering checkpoint immediately before this status commit: `c02dc4b3dfe680c1455031f046354231d3564542`
-- Commit message: `chore: make relay installs deterministic`
-- Always resolve the live branch HEAD again at the start of a new session.
+- Canonical engineering branch: `feat/hichki-completion-20260908`
+- Live HEAD before this reconciliation commit: `6b14d01cb6bb7db0fef5486bf72ae4f780cb5677`
+- `main` remains an older product state and is not the working source.
+- Always resolve the live branch HEAD at the beginning of a new session.
 
-## Implemented and saved on the completion branch
+## Implemented and saved
 
-- Socket.IO realtime relay added while preserving Supabase Realtime as fallback.
-- JWT-authenticated relay with live conversation-membership authorization.
-- Durable Supabase persistence before relay and caller-scoped re-read before broadcast.
-- Duplicate suppression, reconnect/re-auth behavior, typing/presence/receipts support and offline queue integration.
-- Local-first Notes/Music library with IndexedDB + Supabase sync.
+- Socket.IO realtime relay with Supabase Realtime fallback.
+- JWT-authenticated relay plus live conversation-membership authorization.
+- Durable Supabase persistence before relay broadcast and caller-scoped message re-read.
+- Duplicate suppression, reconnect/re-auth, typing, presence, receipts and offline/retry integration.
+- Notes and Music library with local IndexedDB state plus Supabase sync.
 - Account-scoped local library isolation and remote deletion reconciliation.
-- Premium additive Notes/Music UI with create/edit/delete, playback, external share, recipient picker, send-to-chat and received-item save support.
+- Premium Notes/Music UI with create/edit/delete, playback, external share, recipient picker, send-to-chat and received-item save flows.
 - PWA Web Share Target ingestion for shared text/URLs.
-- `note` and `music` chat message kinds.
-- Live Supabase migration `20260908073027_hichki_library_and_message_kinds_v1` applied.
-- Historical live migration `20260811080242_hichki_chat_anon_privilege_hardening_v1` recovered into Git.
-- Library structural RLS/grants/chat-kind guard previously passed; Supabase Security Advisor returned 0 security lints after migration.
-- Relay runtime dependencies are pinned in `realtime-server/package.json`.
-- Relay `package-lock.json` is now committed (`7b370436...`).
-- Relay Dockerfile now copies the lockfile and uses deterministic `npm ci --omit=dev` (`c02dc4b...`).
-- Versioned E2E Auth bootstrap harness added at `scripts/e2e-auth-bootstrap.mjs` (`cb004b72...`) instead of fragile inline shell JavaScript.
+- Chat message kinds include `note` and `music` plus private chat media support.
+- Web/native bridge and Capacitor Android/iOS project wiring.
+- Web push/native push bridge source and Hichki Edge Functions.
+- Deterministic root and realtime-server npm lockfiles are committed.
 
-## Build / verification evidence
+## Current verification evidence
 
-A clean Node 22 feature build was executed during this continuation before the final handoff-only commits:
+### GitHub Actions
 
-- dependency audit: 0 vulnerabilities
-- web build: PASS
-- runtime asset verification: 11 assets PASS
-- PWA manifest verification: PASS
-- Socket.IO/library wiring verification: PASS
+At live HEAD `6b14d01c...`:
 
-Because the branch later received the E2E bootstrap script, relay lockfile and relay Dockerfile determinism commits, the exact current HEAD should still receive one fresh end-to-end `npm ci && npm run build && npm run verify:build` before release certification. Those later commits do not intentionally modify the web UI bundle, but do not label current HEAD fully certified until rerun.
+- `Hichki Build`: PASS on Node 22. It performs deterministic root install, deterministic realtime-server install, realtime `npm run check`, JavaScript syntax checks, web production build and runtime/build-output verification.
+- `Hichki iOS`: PASS for the workflow's current simulator/native build path.
+- The root project does not currently expose separate `lint`, `typecheck` or `vitest` scripts, so those gates must not be claimed as executed.
+- `Hichki Static Verify` was stale: it only targeted `main` and referenced retired offline-queue assets. This reconciliation updates it to the canonical branch and the actual current runtime files.
 
-## Railway realtime staging — verified facts
+### Supabase
 
-Canonical staging relay service:
+Connected hosted project `Hichki` is `ACTIVE_HEALTHY` in `ap-south-1` on Postgres 17.
 
-- Railway project: `Hichki`
-- project ID: `d334e2a3-b997-4886-acb8-b3d6c7280cae`
-- environment ID: `2b3f4c9c-d9e8-45df-82d4-87add857f52c`
-- service: `hichki-realtime-feature`
-- service ID: `f88a029e-deae-4a7a-8e87-791797f0948d`
-- source branch: `feat/hichki-completion-20260908`
-- root: `/realtime-server`
-- builder: Dockerfile
-- healthcheck: `/healthz`
-- public domain: `hichki-realtime-feature-production.up.railway.app`
-- latest successful deployed commit currently reported by Railway: `6ab54ef3c8da48630941eadea67a1ebb68184faf`
-- deployment: `806d3c50-d82c-4cfc-934f-c27a411b2de0`
-- runtime logs verified: `hichki-realtime-server@1.0.0`, `node server.mjs`, `Hichki Socket.IO relay listening on :8080`
+- Seven Hichki Edge Functions are ACTIVE and configured with JWT verification.
+- Hosted migration `20260908141209_hichki_private_chat_media_v1` is already applied.
+- The repository held equivalent SQL under the mismatched version `20260908134500`; this reconciliation aligns the repository migration identity to the hosted migration history without reapplying or mutating the hosted database.
+- Current Security Advisor has one warning: leaked-password protection is disabled.
+- Performance Advisor reports unused-index INFO findings. Do not remove indexes solely from low/no-usage counters without workload evidence.
 
-The service is therefore a real Node/Socket.IO relay, not the earlier accidental Vite/Caddy static-site deployment. It still needs a fresh redeploy from current branch HEAD so the new lockfile/Dockerfile determinism is live before final certification.
+### Railway realtime
 
-There is also a separate `hichki-realtime` service (`d0f304be-dfc7-4961-a966-8459f9e7e727`) that was temporarily used as an isolated cloud runner for E2E bootstrap and lockfile generation. Do NOT treat it as the canonical relay. Inspect its current config before reusing or deleting it.
+Canonical relay service: `hichki-realtime-feature` in Railway project `Hichki`.
 
-## Supabase Auth / 2-user acceptance
+- Latest canonical relay deployment is SUCCESS.
+- Its deployed Git commit is `6ab54ef3c8da48630941eadea67a1ebb68184faf`, older than the canonical GitHub HEAD.
+- Railway production currently reports 15 staged changes. Preserve them; do not blindly redeploy/overwrite them.
+- A fresh canonical relay deployment from the final verified branch is therefore still a release gate and requires deployment authorization.
 
-Two temporary E2E users were created through the supported Supabase signup API with `e2e=true` metadata. Both currently have `email_confirmed_at = NULL`; no authenticated session was returned.
+### Netlify production
 
-Gmail connector reads failed with `404 Link not found`, so confirmation links could not be safely opened in this session. Direct mutation of `auth.users` was intentionally NOT used.
+- Site: `hichki.netlify.app`
+- Current production deploy is the manual deploy from 2026-08-10 (`6a7a077d7914a2c48483a4f0`).
+- It is not linked to the current completion branch/commit and does not represent the current application.
+- That deploy reports no Netlify Functions/Edge Functions.
+- Production deployment from the completion branch is intentionally NOT performed without explicit release authorization.
 
-Therefore authenticated two-user acceptance is NOT PASSED yet. Next session must either:
+## Remaining work — ordered
 
-1. confirm those temporary E2E users through the normal email-confirmation flow, or
-2. use another supported Supabase Auth Admin/API path if available,
+### Executable engineering/source work
 
-then run real two-user chat/library acceptance and clean up the temporary users/test rows afterward.
+1. Keep Static Verify green after this workflow/migration reconciliation.
+2. Inspect any new CI failure caused by this exact commit and fix only real source/workflow defects.
+3. Continue source hardening only if new evidence exposes a real defect; do not invent missing test suites that the project does not contain.
 
-Never claim this gate passed from source inspection alone.
+### Hosted/release work requiring authorization or credentials
 
-## Netlify production — verified current state
+1. Review Railway's 15 staged production changes, then deploy the canonical `hichki-realtime-feature` from the final verified GitHub commit and verify `/healthz`, logs and WebSocket behavior.
+2. Verify/recreate Netlify production build variables for Supabase and `HICHKI_SOCKET_URL`, then deploy the verified completion branch to `hichki.netlify.app`.
+3. Enable Supabase leaked-password protection after owner approval for hosted Auth configuration mutation.
+4. Perform real authenticated two-user production-like acceptance: bidirectional Socket.IO, Supabase fallback, dedupe, receipts, typing, presence, reconnect/offline retry, account switching, Notes/Music sync/share/save, private media and PWA share target.
+5. Confirm Android release signing secrets and produce/verify the signed AAB/APK release path.
+6. Confirm iOS signing/App Store Connect credentials and run the signed/TestFlight release path.
+7. Complete Play Store/App Store metadata, privacy/data-safety declarations, screenshots/icons and review submission evidence.
+8. Merge to `main` only with explicit owner authorization after release evidence is sufficient.
 
-- Site: `https://hichki.netlify.app`
-- site ID: `882286b7-4cd7-4f59-9869-628ad16ea029`
-- current production deploy ID: `6a7a077d7914a2c48483a4f0`
-- manual deploy created 2026-08-10
-- `commit_ref = null`
-- `branch = null`
-- `has_source_zip = false`
-- no functions / edge functions
+## Completion classification
 
-This production deploy is stale and does NOT contain the completion branch.
+- Core product/source implementation: advanced; major requested chat, realtime, Notes/Music, sharing, media and native wiring are present.
+- Backend: healthy and substantially deployed.
+- Exact-current-source build certification: green for the Hichki Build workflow and iOS simulator workflow at the pre-reconciliation HEAD; this reconciliation must receive fresh CI evidence.
+- Public production: stale and not release-certified.
+- Store releases: not certified.
 
-Current Netlify environment-variable readback in this handoff returned only `CLOUDINARY_CLOUD_NAME`. Do not assume previous Supabase/socket env writes are still present. Before any new production deploy, explicitly verify/recreate the required build variables (Supabase URL, browser-safe publishable key, and `HICHKI_SOCKET_URL`) without exposing secret values.
-
-Do NOT deploy stale or unverified output to production.
-
-## Dependency/reproducibility state
-
-- `realtime-server/package-lock.json`: DONE and committed.
-- root web `package-lock.json`: still pending. A cloud runner successfully generated it, but the full root lockfile was not safely extracted/committed during this session. Generate it from current `package.json` with Node 22/npm, verify it, and commit it before final release if possible.
-
-## Remaining release gates — ordered
-
-1. Resolve live HEAD and re-read this file plus `HICHKI_MASTER_PROJECT_CONTEXT.md` and `NEW_CHAT_MASTER_PROMPT.md`.
-2. Inspect Git diff/history from `c02dc4b...` forward and preserve all current branch work.
-3. Generate/commit the root `package-lock.json`; use deterministic `npm ci` in final build paths.
-4. Fresh exact-current-HEAD web build: `npm ci`, audit, `npm run build`, `npm run verify:build`.
-5. Redeploy canonical Railway `hichki-realtime-feature` from current HEAD and verify real `/healthz` JSON + runtime logs/WebSocket path.
-6. Verify Netlify build env contains Supabase URL, publishable key and actual `HICHKI_SOCKET_URL`.
-7. Complete real authenticated two-user acceptance: persistence, bidirectional Socket.IO, Supabase fallback, dedupe, receipts, typing, presence, reconnect, offline retry, account switching, Notes/Music sync/share/save and PWA share target.
-8. Clean up temporary E2E users/data after acceptance.
-9. Run Android Capacitor sync/build/acceptance and Android back/keyboard/safe-area checks.
-10. Run iOS Capacitor sync/build/acceptance where a capable macOS/Xcode runner exists. If not executable, mark NOT RUN; do not fake it.
-11. Only after all relevant gates are green: deploy the verified web bundle to Netlify production.
-12. Merge to `main` only with explicit owner authorization and after release evidence is sufficient.
-
-## Working rules for the next session
-
-- No hallucinated PASS/complete claims.
-- Anything not actually executed is `NOT RUN`.
-- Fix root causes, not symptoms.
-- After the same tool/infrastructure method fails twice, pivot instead of looping.
-- Do not spend money or enable paid infrastructure without approval.
-- Do not expose Supabase keys or passwords.
-- Do not mutate real customer/production data without required approval.
-- Keep Hichki's existing identity; additive premium refinement only, no generic messenger redesign.
-- Save valid work to the canonical feature branch and update project state before stopping.
-
-Status: **source implementation is advanced, realtime staging exists, but release certification/production deployment is intentionally still incomplete.**
+Do not label Hichki 100%, production-ready or launch-ready until the hosted deployment, two-user acceptance and signed mobile release gates are actually executed and green.

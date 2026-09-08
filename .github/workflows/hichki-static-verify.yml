@@ -2,9 +2,9 @@ name: Hichki Static Verify
 
 on:
   push:
-    branches: [main]
+    branches: [feat/hichki-completion-20260908]
   pull_request:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
   workflow_dispatch:
 
 permissions:
@@ -32,25 +32,36 @@ jobs:
           node --check scripts/ensure-vendored-source.mjs
           node --check scripts/inject-hichki-bridge.mjs
           node --check scripts/enable-hichki-v3-features.mjs
+          node --check scripts/retire-legacy-runtime.mjs
+          node --check scripts/copy-runtime-assets.mjs
+          node --check scripts/verify-build-output.mjs
+          node --check scripts/verify-dist-runtime-assets.mjs
           node --check public/hichki-realtime.js
-          node --check public/hichki-offline-queue.js
+          node --check public/hichki-library-ui.js
           node --check public/hichki-library.js
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
-          node --check hichki-offline-queue.js
+          node --check hichki-cloud-ui.js
           node --check hichki-music.js
           node --check hichki-library.js
+          node --check hichki-library-ui.js
           node --check hichki-web-push.js
           node --check hichki-push-bridge.js
           node --check realtime-server/server.mjs
           node --check native.js
 
-      - name: Validate JSON manifests
+      - name: Validate deterministic manifests
         run: |
           set -euo pipefail
-          node -e "for (const f of ['package.json','realtime-server/package.json']) { JSON.parse(require('fs').readFileSync(f,'utf8')); console.log(f + ' OK'); }"
+          node - <<'NODE'
+          const fs = require('fs');
+          for (const f of ['package.json','package-lock.json','realtime-server/package.json','realtime-server/package-lock.json']) {
+            JSON.parse(fs.readFileSync(f, 'utf8'));
+            console.log(f + ' OK');
+          }
+          NODE
 
-      - name: Verify required chat/library assets
+      - name: Verify current chat, library and media assets
         run: |
           set -euo pipefail
           test -f supabase/functions/hichki-conversation-v1/index.ts
@@ -62,8 +73,10 @@ jobs:
           test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
           test -f supabase/migrations/20260811080242_hichki_chat_anon_privilege_hardening_v1.sql
           test -f supabase/migrations/20260908073027_hichki_library_and_message_kinds_v1.sql
+          test -f supabase/migrations/20260908141209_hichki_private_chat_media_v1.sql
           test -f supabase/tests/database/library_security.sql
           test -f public/hichki-realtime.js
-          test -f public/hichki-offline-queue.js
+          test -f public/hichki-library-ui.js
           test -f public/hichki-library.js
+          test -f hichki-cloud-ui.js
           test -f realtime-server/server.mjs

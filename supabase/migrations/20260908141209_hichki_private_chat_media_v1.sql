@@ -1,5 +1,7 @@
 -- Private, conversation-scoped media storage for Hichki chat.
--- Source migration only until explicitly applied to the hosted project.
+-- Canonical source mirror of the hosted Supabase migration version 20260908141209.
+-- The hosted project already records this migration as applied; keep this filename/version
+-- aligned with supabase_migrations.schema_migrations to prevent migration-history drift.
 
 alter table public.chat_messages
   drop constraint if exists chat_messages_kind_check;
