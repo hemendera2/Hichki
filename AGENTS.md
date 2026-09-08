@@ -50,6 +50,16 @@ For substantial work report concise status:
 - `BLOCKED — <specific dependency>`
 - `TASK COMPLETE — <batch>` only after durable evidence exists.
 
+## Repository skills — mandatory routing
+
+Use Hichki-only skills under `.agents/skills` when their domain applies. They supplement this file and never override stronger security/release constraints.
+
+- `.agents/skills/hichki-reliability/SKILL.md` — **always apply at the start of every fresh/resumed Hichki engineering session** and whenever stale context, hallucinated progress, branch confusion, tool loops or cross-project contamination are possible.
+- `.agents/skills/hichki-realtime-security/SKILL.md` — apply to chat, Socket.IO, Supabase Realtime, auth, RLS, receipts, typing, presence, offline retry, private media and Notes/Music sharing.
+- `.agents/skills/hichki-mobile-release/SKILL.md` — apply to Web/PWA, service worker, Capacitor Android/iOS, native bridge/share target, keyboard/safe areas/gestures, build workflows, Netlify and release readiness.
+
+Never import or use Stock Munim or another project's repository skills for Hichki work.
+
 ## Architecture invariants
 
 - Supabase is the authentication, durable database/RLS and private-storage authority.
