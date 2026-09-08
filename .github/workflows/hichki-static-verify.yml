@@ -36,6 +36,7 @@ jobs:
           node --check scripts/copy-runtime-assets.mjs
           node --check scripts/verify-build-output.mjs
           node --check scripts/verify-dist-runtime-assets.mjs
+          node --check scripts/verify-release-config.mjs
           node --check public/hichki-realtime.js
           node --check public/hichki-library-ui.js
           node --check public/hichki-library.js
@@ -50,7 +51,7 @@ jobs:
           node --check realtime-server/server.mjs
           node --check native.js
 
-      - name: Validate deterministic manifests
+      - name: Validate deterministic manifests and deployment contract
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -60,6 +61,9 @@ jobs:
             console.log(f + ' OK');
           }
           NODE
+          test -s netlify.toml
+          grep -Fq 'verify-release-config.mjs' netlify.toml
+          grep -Fq 'publish = "dist"' netlify.toml
 
       - name: Verify current chat, library and media assets
         run: |

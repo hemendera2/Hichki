@@ -1,0 +1,11 @@
+[build]
+  command = "node scripts/verify-release-config.mjs && npm run build && node scripts/verify-release-config.mjs dist/index.html"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

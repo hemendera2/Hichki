@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V13"
+          echo "HICHKI_CI_CONTRACT=V14"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
@@ -39,11 +39,13 @@ jobs:
           test -s realtime-server/package-lock.json
           test -s vendor/hichki-web/index.html
           test -s hichki-cloud-ui.js
+          test -s netlify.toml
           test -s scripts/prepare-web.mjs
           test -s scripts/retire-legacy-runtime.mjs
           test -s scripts/copy-runtime-assets.mjs
           test -s scripts/verify-build-output.mjs
           test -s scripts/verify-dist-runtime-assets.mjs
+          test -s scripts/verify-release-config.mjs
           ! grep -Fq "'icon-512-maskable.png'," scripts/prepare-web.mjs
           grep -Fq "copyFile('public/icon-512.png', 'public/icon-512-maskable.png')" scripts/prepare-web.mjs
           grep -Fq "scripts/local-netlify-fetch.mjs" package.json
@@ -51,6 +53,7 @@ jobs:
           grep -Fq "scripts/copy-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-dist-runtime-assets.mjs" package.json
           grep -Fq "scripts/verify-build-output.mjs" .github/workflows/hichki-build.yml
+          grep -Fq "verify-release-config.mjs" netlify.toml
           grep -Fq "hichki-cloud-ui.js" scripts/inject-hichki-bridge.mjs
           grep -Fq "hichki-cloud-ui.js" scripts/copy-runtime-assets.mjs
           ! grep -Fq "hichki-offline-queue.js" scripts/inject-hichki-bridge.mjs
@@ -94,6 +97,7 @@ jobs:
           node --check scripts/copy-runtime-assets.mjs
           node --check scripts/verify-build-output.mjs
           node --check scripts/verify-dist-runtime-assets.mjs
+          node --check scripts/verify-release-config.mjs
           node --check hichki-realtime.js
           node --check hichki-chat-api.js
           node --check hichki-cloud-ui.js
@@ -138,3 +142,7 @@ jobs:
           find dist -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
           node scripts/verify-dist-runtime-assets.mjs
           node scripts/verify-build-output.mjs
+
+      - name: Verify cloud runtime configuration
+        if: github.event_name != 'pull_request'
+        run: node scripts/verify-release-config.mjs dist/index.html

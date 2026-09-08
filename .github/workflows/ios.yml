@@ -8,6 +8,12 @@ on:
 permissions:
   contents: read
 
+env:
+  HICHKI_SUPABASE_URL: ${{ secrets.HICHKI_SUPABASE_URL }}
+  HICHKI_SUPABASE_ANON_KEY: ${{ secrets.HICHKI_SUPABASE_ANON_KEY }}
+  HICHKI_SOCKET_URL: ${{ secrets.HICHKI_SOCKET_URL }}
+  HICHKI_VAPID_PUBLIC_KEY: ${{ secrets.HICHKI_VAPID_PUBLIC_KEY }}
+
 concurrency:
   group: hichki-ios-${{ github.ref }}
   cancel-in-progress: true
@@ -26,6 +32,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test -s package-lock.json
+          test -s scripts/verify-release-config.mjs
 
       - name: Select Xcode 26
         shell: bash
@@ -58,8 +65,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node scripts/verify-release-config.mjs
           npm run build
           npm run verify:build
+          node scripts/verify-release-config.mjs dist/index.html
 
       - name: Create iOS project with SPM
         run: npx cap add ios --packagemanager SPM
