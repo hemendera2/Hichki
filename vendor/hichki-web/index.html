@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=882286b7-4cd7-4f59-9869-628ad16ea029
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=882286b7-4cd7-4f59-9869-628ad16ea029">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#141410"/>
+<meta name="description" content="Hichki — Your quiet corner. Local-first chats, journal, music."/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>Hichki — Your quiet corner</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Hichki"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBF6E4;--paperDark:#F4EED2;--card:#FFFFFF;--ink:#141410;--mut:#8A8878;
+  --gridLine:rgba(180,150,60,.16);
+  --y:#FFD93D;--p:#F7BBD8;--g:#8BE3AE;--l:#CFC8F7;--peach:#FFBC94;--sky:#A6D8F0;--coral:#FFA69E;
+  --panel:#141416;--them:#26262A;--ptx:#EFEDE6;--pmut:rgba(239,237,230,.5);
+  --sh:0 1px 2px rgba(20,20,16,.04),0 6px 18px rgba(20,20,16,.06);
+  --shSoft:0 2px 8px rgba(20,20,16,.05),0 12px 28px rgba(20,20,16,.08);
+  --accent:#B08800;
+  --ease:cubic-bezier(.34,1.56,.64,1);
+  --readonly:#8BE3AE;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif;-webkit-tap-highlight-color:transparent}
+.serif{font-family:'Fraunces',serif}
+body{background:#DEDDD8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+::-webkit-scrollbar{width:0;height:0}
+button{background:none;border:none;cursor:pointer;color:inherit;font:inherit}
+svg{display:block;flex-shrink:0}
+input,textarea{font-family:inherit}
+
+.notebook{
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--gridLine) 1px,transparent 1px),
+    linear-gradient(90deg,var(--gridLine) 1px,transparent 1px);
+  background-size:24px 24px;background-position:-1px -1px;position:relative;
+}
+.plain{background:var(--paper)}
+
+#app{width:392px;height:812px;color:var(--ink);border-radius:44px;overflow:hidden;
+position:relative;box-shadow:0 40px 80px -20px rgba(0,0,0,.35)}
+.sc{position:absolute;inset:0;display:none;flex-direction:column}.sc.on{display:flex}
+
+/* LOGO & BUTTONS */
+.logo{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--paper);
+padding:9px 17px 9px 10px;border-radius:100px;font-weight:800;font-size:15px;letter-spacing:-.02em}
+.logoMark{width:22px;height:22px;position:relative;display:grid;place-items:center}
+.logoMark svg{animation:spin 20s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cta{background:var(--y);color:#141410;border-radius:100px;padding:7px 7px 7px 24px;display:flex;
+align-items:center;justify-content:space-between;font-weight:700;font-size:15px;width:100%;
+transition:transform .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(255,217,61,.45)}
+.cta:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(255,217,61,.5)}
+.cta:active{transform:translateY(0);box-shadow:0 4px 14px rgba(255,217,61,.4)}
+.cta:disabled{opacity:.4;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.cta i{width:40px;height:40px;border-radius:50%;background:#141410;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.cta.slim{padding:6px 6px 6px 20px;font-size:14px}
+.cta.slim i{width:34px;height:34px}
+.cta.secondary{background:transparent;color:var(--mut);padding:12px;justify-content:center;font-size:13px;box-shadow:none}
+.cta.secondary:hover{color:var(--ink);transform:none;box-shadow:none}
+.ico{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;
+transition:transform .15s;flex-shrink:0}
+.ico:active{transform:scale(.94)}
+.ico.g{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+.ico.sm{width:34px;height:34px}
+.sub{font-size:13px;color:var(--mut);line-height:1.55;font-weight:500}
+
+/* ONBOARDING */
+.onbHead{display:flex;align-items:center;justify-content:space-between;padding:22px 26px 0}
+.progress{display:flex;gap:6px;align-items:center}
+.progress i{width:22px;height:4px;border-radius:100px;background:rgba(20,20,16,.12);transition:.3s}
+.progress i.on{background:var(--ink);width:32px}
+.progress i.done{background:var(--y)}
+.skip{font-size:12px;font-weight:700;color:var(--mut);cursor:pointer;padding:6px 10px;transition:color .15s}
+.skip:hover{color:var(--ink)}
+.onbBody{flex:1;display:flex;flex-direction:column;padding:0 26px;overflow-y:auto}
+.onbFooter{padding:16px 26px 26px}
+#o1 .onbBody{padding-top:18px}
+#o1 h1{font-family:'Fraunces',serif;font-weight:700;font-size:34px;line-height:1.1;letter-spacing:-.03em;position:relative}
+#o1 h1 em{font-style:italic;color:var(--accent);font-weight:600;position:relative;display:inline-block}
+#o1 h1 em::after{content:'';position:absolute;left:-2px;right:-2px;bottom:3px;height:9px;background:var(--y);z-index:-1;border-radius:4px;opacity:.55;transform:rotate(-.5deg)}
+.hero{position:relative;height:222px;margin:12px 0}
+.fc{position:absolute;border-radius:20px;padding:13px 15px;background:#fff;box-shadow:var(--shSoft);overflow:hidden}
+.fc1{width:158px;top:10px;left:6px;background:var(--p);transform:rotate(-6deg);animation:drift1 7s ease-in-out infinite;box-shadow:0 14px 28px rgba(247,187,216,.5),var(--shSoft);z-index:1}
+.fc2{width:178px;top:76px;left:108px;background:linear-gradient(135deg,#A5F2CB,#5FD6A6 65%,#3FC98F);transform:rotate(3deg);z-index:2;animation:drift2 8s ease-in-out infinite;box-shadow:0 14px 30px rgba(95,214,166,.55),var(--shSoft)}
+.fc3{width:160px;top:16px;left:206px;background:var(--y);transform:rotate(5deg);animation:drift3 6.5s ease-in-out infinite;box-shadow:0 14px 28px rgba(255,217,61,.55),var(--shSoft);z-index:0}
+@keyframes drift1{0%,100%{transform:rotate(-6deg) translate(0,0)}50%{transform:rotate(-5deg) translate(2px,-8px)}}
+@keyframes drift2{0%,100%{transform:rotate(3deg) translate(0,0)}50%{transform:rotate(2deg) translate(-3px,-10px)}}
+@keyframes drift3{0%,100%{transform:rotate(5deg) translate(0,0)}50%{transform:rotate(6deg) translate(3px,-7px)}}
+.fc .cardTop{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.fc .cAv{width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden;flex-shrink:0}
+.fc1 .cAv{background:linear-gradient(160deg,#FDE3EF,#F8C7DD)}
+.fc .cAv svg{width:24px;height:24px}
+.fc .cName{font-weight:800;font-size:12px;letter-spacing:-.01em;color:#141410;white-space:nowrap}
+.fc .cSub{font-size:9.5px;font-weight:500;opacity:.6;margin-left:auto;color:#141410;white-space:nowrap}
+.fc p{font-size:11px;line-height:1.45;font-weight:500;color:#141410;opacity:.85}
+.miniChat{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.miniBub{font-size:10.5px;font-weight:600;padding:6px 10px;line-height:1.35;max-width:90%}
+.miniBub.them{background:#141410;color:#EFEDE6;align-self:flex-start;border-radius:11px 11px 11px 4px}
+.miniBub.me{background:#fff;color:#141410;align-self:flex-end;border-radius:11px 11px 4px 11px;font-weight:700}
+.fc2 .cover{width:34px;height:34px;border-radius:10px;background:linear-gradient(160deg,#141410,#3a3a34);display:grid;place-items:center;color:var(--y);box-shadow:0 4px 10px rgba(0,0,0,.3);flex-shrink:0}
+.mBadge{display:inline-flex;align-items:center;gap:5px;background:#141410;color:var(--y);padding:3px 9px;border-radius:100px;font-size:8.5px;font-weight:800;letter-spacing:.05em;margin-bottom:9px}
+.mBadge i{width:5px;height:5px;border-radius:50%;background:var(--y);animation:blink 1.2s infinite}
+.fc2 .wave{display:flex;align-items:end;gap:2.5px;height:20px;margin-top:2px}
+.fc2 .wave i{flex:1;background:#141410;border-radius:2px;animation:wv 1.4s ease-in-out infinite}
+.fc2 .wave i:nth-child(3n){background:var(--accent)}
+.fc2 .wave i:nth-child(1){height:35%}.fc2 .wave i:nth-child(2){height:70%}
+.fc2 .wave i:nth-child(3){height:50%}.fc2 .wave i:nth-child(4){height:95%}
+.fc2 .wave i:nth-child(5){height:60%}.fc2 .wave i:nth-child(6){height:80%}
+.fc2 .wave i:nth-child(7){height:40%}.fc2 .wave i:nth-child(8){height:65%}
+.fc2 .wave i:nth-child(9){height:50%}.fc2 .wave i:nth-child(10){height:85%}
+@keyframes wv{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+.fc3 .badge{display:inline-flex;align-items:center;gap:5px;background:#141410;color:var(--y);padding:3px 9px;border-radius:100px;font-size:9px;font-weight:800;letter-spacing:.04em;margin-bottom:8px}
+.fc3 .badge i{width:5px;height:5px;border-radius:50%;background:var(--y);animation:blink 1.5s infinite}
+@keyframes blink{50%{opacity:.3}}
+.fc3 h6{font-family:'Fraunces',serif;font-weight:700;font-size:13px;letter-spacing:-.02em;margin-bottom:3px;color:#141410}
+.fc3 p{font-style:italic;font-size:10.5px;opacity:.7}
+.principles{display:flex;flex-direction:column;gap:13px;margin-top:6px}
+.pri{display:flex;gap:14px;align-items:flex-start}
+.pri .pd{width:8px;height:8px;border-radius:50%;background:var(--ink);flex-shrink:0;margin-top:6px}
+.pri .pd.y{background:var(--y)}.pri .pd.p{background:var(--p)}.pri .pd.g{background:var(--g)}
+.pri .t{font-size:13.5px;font-weight:700;letter-spacing:-.01em;line-height:1.35;color:var(--ink)}
+.pri .t small{display:block;font-size:11.5px;color:var(--mut);font-weight:500;margin-top:2px;line-height:1.45}
+#o2 .onbBody{justify-content:center;padding-top:20px}
+#o2 h1{font-family:'Fraunces',serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:-.03em;margin-bottom:6px;text-align:center}
+#o2 h1 em{font-style:italic;color:var(--accent);font-weight:600}
+#o2 .sub{text-align:center}
+.avPreview{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:700;font-size:40px;color:#141410;margin:26px auto 22px;letter-spacing:-.02em;box-shadow:var(--shSoft);transition:background .3s}
+.field{background:var(--card);border-radius:20px;padding:15px 20px;margin-bottom:11px;box-shadow:var(--sh)}
+.field label{font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px}
+.field input{width:100%;border:none;outline:none;background:none;font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.field input::placeholder{color:var(--mut);font-weight:500}
+.colorPicker{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;transition:transform .15s;position:relative;border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.swatch:active{transform:scale(.92)}
+.swatch.on{border-color:var(--ink);transform:scale(1.1);box-shadow:0 4px 10px rgba(0,0,0,.15)}
+.swatch.on::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:var(--ink);font-weight:800;font-size:14px}
+#o3 .onbBody{justify-content:center;padding-top:16px}
+.oneTime{display:inline-flex;align-items:center;gap:6px;background:var(--y);color:#141410;padding:6px 12px;border-radius:100px;font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;align-self:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(255,217,61,.4)}
+#o3 h1{font-family:'Fraunces',serif;font-weight:700;font-size:28px;line-height:1.12;letter-spacing:-.03em;text-align:center;margin-bottom:6px}
+#o3 h1 em{font-style:italic;color:var(--accent);font-weight:600}
+#o3 .sub{text-align:center;margin-bottom:22px}
+.pairPreview{display:flex;align-items:center;justify-content:center;gap:18px;margin:0 0 22px}
+.pairPreview .av{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:#141410;letter-spacing:-.02em;transition:background .3s;box-shadow:var(--shSoft)}
+.pairPreview .conn{display:flex;align-items:center;gap:4px}
+.pairPreview .conn i{width:5px;height:5px;border-radius:50%;background:var(--ink);animation:pd 1.8s infinite;opacity:.4}
+.pairPreview .conn i:nth-child(2){animation-delay:.2s}.pairPreview .conn i:nth-child(3){animation-delay:.4s}
+@keyframes pd{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:1;transform:scale(1.15)}}
+#o4 .onbBody{align-items:center;justify-content:center;text-align:center;padding-top:20px}
+.celebrate{position:relative;padding:40px 20px;width:100%}
+.confetti{position:absolute;width:8px;height:8px;border-radius:2px;animation:conf 2s ease-out forwards}
+@keyframes conf{0%{opacity:0;translate:0 0;transform:rotate(0)}20%{opacity:1}100%{opacity:0;translate:var(--tx) var(--ty);transform:rotate(360deg)}}
+.bigAv{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:700;font-size:48px;color:#141410;margin:0 auto 24px;letter-spacing:-.02em;box-shadow:var(--shSoft);animation:popIn .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{scale:.3;opacity:0}to{scale:1;opacity:1}}
+#o4 h1{font-family:'Fraunces',serif;font-weight:700;font-size:32px;line-height:1.1;letter-spacing:-.03em;margin-bottom:10px}
+#o4 h1 em{font-style:italic;color:var(--accent);font-weight:600}
+
+/* SHELL & NAVBAR */
+.hContent{flex:1;overflow-y:auto;padding:22px 22px 14px}
+.hdr{display:flex;align-items:center;justify-content:space-between}
+.date{font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+.avme{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13.5px;color:#141410;letter-spacing:-.02em;cursor:pointer;font-family:'Fraunces',serif;box-shadow:var(--sh);transition:transform .15s}
+.avme:active{transform:scale(.94)}
+.hContent h2{font-family:'Fraunces',serif;font-weight:700;font-size:32px;letter-spacing:-.03em;line-height:1.1;margin:16px 0 6px}
+.hContent h2 em{font-style:italic;color:var(--accent);font-weight:600}
+.subtitle{font-size:13px;color:var(--mut);font-weight:500;margin-bottom:18px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px;gap:12px}
+.sh h4{font-size:15px;font-weight:800;letter-spacing:-.02em}
+.sh b{font-size:11.5px;color:var(--mut);font-weight:600;cursor:pointer;flex-shrink:0}
+.sh b:hover{color:var(--ink)}
+.why{font-size:11px;color:var(--mut);font-weight:500;margin-top:2px;line-height:1.4}
+.navbar{display:flex;align-items:center;justify-content:space-around;padding:8px 10px 14px;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -6px 20px rgba(20,20,16,.06);flex-shrink:0}
+.navItem{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 18px;border-radius:16px;cursor:pointer;color:var(--mut);transition:.15s}
+.navItem:active{transform:scale(.94)}
+.navItem.active{color:var(--ink);background:var(--paperDark)}
+.navItem span{font-size:9.5px;font-weight:700;letter-spacing:.02em}
+
+/* HOME */
+.circle{display:flex;gap:9px;overflow-x:auto;padding:2px 22px 6px;margin:0 -22px}
+.pcard{min-width:122px;max-width:122px;border-radius:18px;padding:12px;color:#141410;display:flex;flex-direction:column;position:relative;background:#fff;cursor:pointer;transition:transform .15s;box-shadow:var(--sh)}
+.pcard:active{transform:scale(.97)}
+.pcard .a{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;margin-bottom:9px;font-family:'Fraunces',serif;letter-spacing:-.02em;box-shadow:var(--sh)}
+.pcard h5{font-size:13px;font-weight:800;letter-spacing:-.01em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .last{font-size:10px;color:var(--mut);font-weight:500;margin-top:3px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .since{margin-top:9px;font-size:9.5px;font-weight:700;padding:4px 8px;border-radius:100px;background:var(--paperDark);align-self:flex-start;color:#141410}
+.pcard .since.warm{background:var(--y)}
+.pcard.addNew{background:transparent;border:1.6px dashed rgba(20,20,16,.32);align-items:center;justify-content:center;text-align:center;box-shadow:none;min-height:118px}
+.pcard.addNew .plus{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;margin-bottom:8px}
+.pcard.addNew h5{font-size:11.5px}.pcard.addNew .last{margin-top:2px}
+.pcard.full{background:linear-gradient(135deg,var(--y),var(--peach));text-align:center;justify-content:center;align-items:center;min-height:118px}
+.pcard.full .emoji{font-size:24px;margin-bottom:6px}
+.pcard.full h5{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.pcard.full .last{font-size:9px;margin-top:2px;opacity:.75;white-space:nowrap;text-align:center}
+.todayList{display:grid;grid-template-columns:1fr;gap:10px}
+.iceR{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:14px 16px;cursor:pointer;transition:transform .15s;box-shadow:var(--sh)}
+.iceR:active{transform:scale(.98)}
+.iceR .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.iceR .t{flex:1;font-size:13px;font-weight:600;letter-spacing:-.01em;min-width:0;}
+.iceR .t small{display:block;font-size:11px;color:var(--mut);font-weight:500;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iceR svg{color:var(--mut)}
+.askAi{background:linear-gradient(135deg,#FFD93D 0%,#FFF0AA 100%);box-shadow:0 6px 14px rgba(255,217,61,.3)}
+.emptyCircle{text-align:center;padding:30px 20px;border:1.8px dashed rgba(20,20,16,.28);border-radius:22px}
+.emptyCircle svg{margin:0 auto 10px;opacity:.5}
+.emptyCircle h5{font-family:'Fraunces',serif;font-weight:700;font-size:16px;letter-spacing:-.02em;margin-bottom:4px}
+.emptyCircle p{font-size:12px;color:var(--mut);font-weight:500;margin-bottom:14px}
+
+/* JOURNAL LIBRARY */
+.jHint{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:var(--mut);letter-spacing:.03em;margin:2px 2px 12px}
+.jHint .bar{flex:1;height:1px;background:rgba(20,20,16,.1)}
+.jNav{display:flex;align-items:center;gap:8px}
+.jNav button{width:26px;height:26px;border-radius:50%;background:var(--card);box-shadow:var(--sh);display:grid;place-items:center;color:var(--ink);transition:transform .15s}
+.jNav button:active{transform:scale(.88)}
+.jNav b{font-size:10.5px;font-weight:800;color:var(--ink);min-width:38px;text-align:center;letter-spacing:.02em}
+.jCard{position:relative;background:var(--cbg,#FFF3C4);color:#141410;border-radius:5px 16px 16px 16px;padding:13px 14px 12px;cursor:pointer;box-shadow:var(--shSoft);overflow:visible;border:1px solid rgba(20,20,16,.05)}
+.jCard::before{content:'';position:absolute;top:-7px;left:14px;width:38px;height:11px;border-radius:5px 5px 0 0;background:var(--ctab,#FFD93D)}
+.jCard .jTopRow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.jCard .jDot{width:9px;height:9px;border-radius:50%;background:var(--ctab,#FFD93D);flex-shrink:0;box-shadow:0 0 0 3px rgba(20,20,16,.05)}
+.jCard .jMeta{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(20,20,16,.45)}
+.jCard .jPin{width:16px;height:16px;color:rgba(20,20,16,.6);margin-left:4px}
+.jCard .jShare{margin-left:auto;width:24px;height:24px;border-radius:50%;background:rgba(20,20,16,.07);display:grid;place-items:center;transition:transform .15s;flex-shrink:0}
+.jCard .jShare:active{transform:scale(.85)}
+.jCard .jt{font-family:'Fraunces',serif;font-size:16px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jCard .jp{font-size:11.5px;font-weight:500;color:rgba(20,20,16,.55);line-height:1.4;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jCard .jFoot{display:flex;align-items:center;justify-content:space-between;margin-top:11px}
+.jCard .jTag{font-size:9.5px;font-weight:700;color:rgba(20,20,16,.5)}
+.jCard .jArrow{width:22px;height:22px;border-radius:50%;background:rgba(20,20,16,.9);color:var(--paper);display:grid;place-items:center;flex-shrink:0}
+.jFlow{display:flex;flex-direction:column;gap:18px;padding:8px 2px 4px}
+.jFlow .jCard{animation:jRise .45s var(--ease) both}
+@keyframes jRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.jStack{position:relative;height:176px;margin:8px 2px 0;touch-action:none;user-select:none}
+.jStack .jCard{position:absolute;left:0;right:0;top:0;transition:transform .5s var(--ease),opacity .3s ease,box-shadow .3s ease;will-change:transform}
+.jStack .jCard[data-o="0"]{box-shadow:var(--shSoft);z-index:5}
+.jStack .jCard[data-o="1"]{z-index:4}.jStack .jCard[data-o="2"]{z-index:3}.jStack .jCard[data-o="3"]{z-index:2}
+.jStack .jCard.hid{opacity:0;pointer-events:none;z-index:1}
+.jStack .jCard:not([data-o="0"]) .jFoot, .jStack .jCard:not([data-o="0"]) .jp{opacity:0;transition:opacity .2s}
+
+/* JOURNAL EDITOR */
+.jeTitle{width:100%;border:none;outline:none;background:none;font-family:'Fraunces',serif;font-weight:700;font-size:25px;letter-spacing:-.02em;color:var(--ink);margin-bottom:12px;line-height:1.25}
+.jeTitle::placeholder{color:var(--mut);opacity:.55}
+.jeText{width:100%;min-height:420px;border:none;outline:none;background:none;resize:none;font-size:14.5px;line-height:24px;font-weight:500;color:var(--ink)}
+.jeText::placeholder{color:var(--mut)}
+#jeMood .swatch{width:22px;height:22px}
+
+/* MUSIC */
+.player{background:#141410;border-radius:26px;padding:20px 18px 18px;margin:14px 0 4px;color:#EFEDE6;box-shadow:0 16px 34px rgba(20,20,16,.28);position:relative;overflow:hidden}
+.player::before{content:'';position:absolute;top:-50%;right:-15%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,217,61,.16),transparent 70%);pointer-events:none}
+.pShare{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.09);display:grid;place-items:center;color:#EFEDE6;z-index:2;transition:transform .15s}
+.pShare:active{transform:scale(.85)}
+.vinylRow{position:relative;height:58px;margin-bottom:8px;z-index:1}
+.albumArt{width:58px;height:58px;border-radius:50%;position:absolute;left:0;top:0;box-shadow:0 8px 20px rgba(0,0,0,.4);background:radial-gradient(circle at center,var(--sc,var(--y)) 0 9px,#141410 10px,#141410 21px,#2a2a26 22px,#141410 23px,#141410 100%)}
+.albumArt::after{content:'';position:absolute;top:50%;left:50%;width:6px;height:6px;border-radius:50%;background:var(--paper);transform:translate(-50%,-50%)}
+.albumArt.spin{animation:spin 2.8s linear infinite}
+.tonearm{position:absolute;top:-6px;right:4px;transform-origin:82% 22%;transform:rotate(-30deg);transition:transform .5s var(--ease);filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.tonearm.active{transform:rotate(2deg)}
+.trackInfo{position:relative;z-index:1;margin-bottom:10px;padding-right:36px}
+.trackInfo h5{font-family:'Fraunces',serif;font-weight:700;font-size:18px;letter-spacing:-.02em;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trackInfo p{font-size:12px;color:rgba(239,237,230,.55);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.progRow{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative;z-index:1;font-size:10px;color:rgba(239,237,230,.6);font-weight:600;}
+.progRow .prog{flex:1;height:4px;background:rgba(255,255,255,.14);border-radius:4px;overflow:hidden;position:relative;cursor:pointer;transition:opacity .2s;}
+.progRow .prog i{display:block;height:100%;background:var(--y);border-radius:4px;width:0%;pointer-events:none;}
+.wave.big{display:flex;align-items:end;justify-content:center;gap:3px;height:24px;margin-bottom:14px;position:relative;z-index:1;transition:opacity .2s}
+.wave.big i{width:3px;background:var(--y);border-radius:3px;animation:wv 1.3s ease-in-out infinite;opacity:.9}
+.wave.big i:nth-child(4n){background:#fff;opacity:.5}
+.wave.big.paused i{animation-play-state:paused;opacity:.25}
+.wave.big i:nth-child(1){height:30%}.wave.big i:nth-child(2){height:65%}.wave.big i:nth-child(3){height:45%}
+.wave.big i:nth-child(4){height:90%}.wave.big i:nth-child(5){height:55%}.wave.big i:nth-child(6){height:75%}
+.wave.big i:nth-child(7){height:35%}.wave.big i:nth-child(8){height:60%}.wave.big i:nth-child(9){height:80%}
+.wave.big i:nth-child(10){height:40%}.wave.big i:nth-child(11){height:70%}.wave.big i:nth-child(12){height:50%}
+.wave.big i:nth-child(13){height:85%}.wave.big i:nth-child(14){height:45%}.wave.big i:nth-child(15){height:65%}
+.transport{display:flex;align-items:center;justify-content:center;gap:20px;position:relative;z-index:1}
+.tBtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#EFEDE6;transition:.15s}
+.tBtn:active{transform:scale(.88)}
+.tBtn.main{width:52px;height:52px;background:var(--y);color:#141410;box-shadow:0 8px 20px rgba(255,217,61,.4)}
+@keyframes mIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.mRow{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:transform .15s;box-shadow:var(--sh);animation:mIn .4s var(--ease) both}
+.mRow:active{transform:scale(.98)}
+.mRow .mc{width:40px;height:40px;border-radius:50%;flex-shrink:0;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.22);background:radial-gradient(circle at center,var(--sc,var(--y)) 0 6px,#141410 7px,#141410 14px,#2a2a26 15px,#141410 16px,#141410 100%)}
+.mRow .mc::after{content:'';position:absolute;top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:var(--paper);transform:translate(-50%,-50%)}
+.mRow .mc.spin{animation:spin 2.6s linear infinite}
+.mRow .mi{flex:1;min-width:0}
+.mRow .mi b{display:block;font-size:13px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mRow .mi span{font-size:11px;color:var(--mut);font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mRow .dur{font-size:11px;color:var(--mut);font-weight:600;flex-shrink:0}
+.mRow.playing{background:var(--paperDark)}
+.mRow .mini{display:flex;align-items:end;gap:2px;height:14px;flex-shrink:0}
+.mRow .mini i{width:2.5px;background:var(--accent);border-radius:2px;animation:wv 1s ease-in-out infinite}
+.mRow .mini i:nth-child(1){height:40%}.mRow .mini i:nth-child(2){height:100%;animation-delay:.15s}.mRow .mini i:nth-child(3){height:65%;animation-delay:.3s}
+.mRow .fav{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--mut);transition:transform .15s,color .15s;flex-shrink:0}
+.mRow .fav.on{color:var(--coral)}
+.mRow .fav:active{transform:scale(.78)}
+.mRow .sendBtn{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--mut);flex-shrink:0}
+.mRow .sendBtn:active{transform:scale(.8)}
+.mActionRow{display:flex;gap:10px;margin-bottom:14px}
+.mActionRow button{flex:1;background:var(--card);border-radius:12px;padding:10px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:var(--sh);transition:transform .1s}
+.mActionRow button:active{transform:scale(.95)}
+
+/* CHAT */
+.tb{display:flex;align-items:center;justify-content:space-between;padding:14px 12px 6px;gap:10px}
+.who{display:flex;align-items:center;gap:9px;background:var(--card);border-radius:100px;padding:7px 16px 7px 9px;box-shadow:0 0 0 2px var(--whoRing,transparent),var(--sh);font-size:14px;font-weight:700;letter-spacing:-.015em;max-width:210px;cursor:pointer;transition:transform .15s,box-shadow .3s}
+.who:active{transform:scale(.96)}
+.who .d{width:24px;height:24px;border-radius:50%;flex-shrink:0}
+.who span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cn{padding:0 14px 2px;font-family:'Fraunces',serif;font-weight:700;font-size:21px;letter-spacing:-.025em;line-height:1.2}
+#cn em{font-style:italic;color:var(--accent);font-weight:600}
+#cs{padding:0 14px 6px;font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.03em}
+.panel{flex:1;background:radial-gradient(120% 55% at 50% 0%,var(--panelGlow,rgba(255,217,61,.1)),transparent 60%),var(--panel);border-radius:22px;padding:14px 10px 12px;overflow-y:auto;position:relative;transition:background .3s}
+.nameCap{display:flex;align-items:center;gap:7px;color:var(--ptx);font-size:11px;font-weight:700;margin-bottom:7px;opacity:.85}
+.nameCap .a{width:19px;height:19px;border-radius:50%;font-size:8px;font-weight:800;color:#141410;display:grid;place-items:center;font-family:'Fraunces',serif}
+.meCap{display:flex;align-items:center;gap:7px;justify-content:flex-end;margin:12px 0 7px;font-size:11px;font-weight:700;color:var(--ptx)}
+.meCap .a{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:800;color:#141410;font-family:'Fraunces',serif}
+.msg{display:flex;margin-bottom:5px;animation:fi .3s ease}.msg.me{justify-content:flex-end}
+.wr{max-width:82%;position:relative}
+.bub{padding:10px 14px;font-size:13.5px;line-height:1.5;word-break:break-word;cursor:pointer;user-select:none;transition:transform .12s}
+.bub:active{transform:scale(.98)}
+.them .bub{background:var(--them);color:var(--ptx);border-radius:16px 16px 16px 5px}
+.me .bub{background:#fff;color:#141410;border-radius:16px 16px 5px 16px;font-weight:500}
+.bub.pad0{padding:5px}
+.qt{padding:6px 10px;border-left:3px solid var(--y);background:rgba(255,217,61,.12);border-radius:6px;margin-bottom:6px;font-size:11.5px;line-height:1.4;opacity:.85}
+.qt b{display:block;font-size:10px;font-weight:700;color:var(--y);margin-bottom:2px;letter-spacing:.02em}
+.me .qt{background:rgba(20,20,16,.06);border-color:var(--accent)}
+.me .qt b{color:var(--accent)}
+.rx{position:absolute;bottom:-9px;background:var(--panel);border-radius:100px;padding:1px 5px;font-size:12px;box-shadow:0 0 0 2px var(--panel);animation:popIn .3s var(--ease)}
+.them .rx{right:-2px}.me .rx{left:-2px}
+.tm{font-size:10px;color:var(--pmut);margin-top:4px}.me .tm{text-align:right}
+.day{display:flex;justify-content:center;padding:10px 0 4px}
+.day span{font-size:9.5px;color:var(--pmut);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.mediaImg{border-radius:13px;overflow:hidden;display:block;max-width:220px}
+.mediaImg img{width:100%;display:block}
+.cap{font-size:12.5px;line-height:1.45;padding:7px 9px 3px}
+.vidBub{display:flex;align-items:center;gap:10px;min-width:180px}
+.vidBub .th{width:44px;height:44px;border-radius:11px;background:rgba(20,20,16,.75);display:grid;place-items:center;color:var(--y);flex-shrink:0}
+.me .vidBub .th{background:#141410}
+.fileBub{display:flex;align-items:center;gap:10px;min-width:170px}
+.fileBub .fi{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;background:rgba(255,217,61,.22);color:var(--y)}
+.me .fileBub .fi{background:rgba(20,20,16,.08);color:var(--accent)}
+.mBubName{font-size:12.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.mBubSub{font-size:10.5px;opacity:.6;font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.songBub{display:flex;align-items:center;gap:10px;min-width:190px;cursor:pointer}
+.songBub .sv{width:38px;height:38px;border-radius:50%;flex-shrink:0;position:relative;background:radial-gradient(circle at center,var(--sc,var(--y)) 0 5px,#141410 6px,#141410 13px,#2a2a26 14px,#141410 15px,#141410 100%)}
+.songBub .pl{width:26px;height:26px;border-radius:50%;background:var(--y);color:#141410;display:grid;place-items:center;flex-shrink:0}
+.noteBub{min-width:190px;border-left:3px solid var(--nc,var(--y));padding-left:10px;cursor:pointer}
+.noteBub .nt{font-family:'Fraunces',serif;font-size:14px;font-weight:700;letter-spacing:-.02em}
+.noteBub .np{font-size:11.5px;opacity:.65;margin-top:2px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.noteBub .nl{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.5;margin-bottom:4px}
+.readonlyBadge{display:inline-flex;align-items:center;gap:4px;background:var(--readonly);color:#141410;padding:2px 8px;border-radius:100px;font-size:8px;font-weight:800;letter-spacing:.04em;margin-bottom:6px}
+.readonlyBadge svg{width:10px;height:10px}
+.rb{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;background:var(--card);border-radius:100px;padding:9px 14px;display:none;gap:11px;align-items:center;box-shadow:var(--shSoft);z-index:6;animation:pop .22s var(--ease)}
+.rb.on{display:flex}
+.rb span{font-size:20px;cursor:pointer;transition:transform .15s}
+.rb span:active{transform:scale(1.35)}
+.rb .act{cursor:pointer;padding:6px;display:grid;place-items:center;border-left:1px solid rgba(20,20,16,.1);padding-left:11px;margin-left:1px}
+.rb b{font-size:14px;color:var(--mut);font-weight:700;cursor:pointer;padding:0 4px}
+.replyBar{background:var(--card);border-radius:16px;padding:10px 14px;margin:0 4px 8px;display:none;align-items:center;gap:10px;box-shadow:var(--sh);border-left:3px solid var(--y);animation:fi .25s ease}
+.replyBar.on{display:flex}
+.replyBar .info{flex:1;min-width:0}
+.replyBar .info b{display:block;font-size:10.5px;font-weight:700;color:var(--accent);margin-bottom:2px;letter-spacing:.02em}
+.replyBar .info p{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.replyBar .close{color:var(--mut);cursor:pointer;padding:4px}
+.empty{height:100%;display:grid;place-items:center;text-align:center;padding:20px}
+.empty .iceChips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px;max-width:280px}
+.empty .iceChips button{background:rgba(255,217,61,.15);border:1px solid rgba(255,217,61,.4);color:var(--y);padding:7px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer}
+.comp{display:flex;align-items:center;gap:8px;padding:10px 10px 18px}
+.plusBtn{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:var(--sh);color:var(--ink);transition:transform .2s;flex-shrink:0}
+.plusBtn:active{transform:scale(.9) rotate(90deg)}
+.fld{flex:1;background:#fff;border-radius:100px;padding:5px 6px 5px 18px;display:flex;align-items:center;box-shadow:0 0 0 1.5px var(--ringc,rgba(20,20,16,.06)),var(--sh);transition:box-shadow .3s;min-width:0}
+.fld input{flex:1;border:none;outline:none;background:none;font-size:14px;font-weight:500;color:var(--ink);padding:11px 0;min-width:0}
+.fld input::placeholder{color:var(--mut)}
+.send{width:42px;height:42px;border-radius:50%;background:var(--sendBg,#3ECF7E);display:grid;place-items:center;color:#141410;box-shadow:0 6px 16px var(--sendSh,rgba(62,207,126,.4));transition:.2s;flex-shrink:0}
+.send:active{transform:scale(.92)}
+.send.off{background:var(--sendOffBg,var(--card));color:var(--sendOffIcon,var(--mut));box-shadow:var(--sh)}
+.attGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.attTile{background:var(--card);border-radius:18px;padding:15px 8px 13px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--sh);cursor:pointer;transition:transform .15s;animation:jRise .35s var(--ease) both}
+.attTile:active{transform:scale(.95)}
+.attTile .ai{width:38px;height:38px;border-radius:13px;display:grid;place-items:center}
+.attTile span{font-size:11px;font-weight:700;letter-spacing:-.01em}
+
+/* SETTINGS */
+.setGroup{margin-bottom:22px;border-radius:18px;overflow:hidden;box-shadow:var(--sh)}
+.setGroup .lbl{background:var(--paperDark);font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:10px 16px}
+.setRow{background:var(--card);padding:14px 16px;display:flex;align-items:center;gap:12px;border-top:1px solid rgba(20,20,16,.05);cursor:pointer}
+.setRow:active{background:var(--paperDark)}
+.setRow .icn{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.setRow .t{flex:1;font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.setRow .t small{display:block;font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
+.toggle{width:40px;height:22px;border-radius:100px;background:rgba(20,20,16,.15);position:relative;transition:.2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--g)}.toggle.on::after{left:20px}
+.about{text-align:center;padding:20px 0;font-size:11px;color:var(--mut);line-height:1.6}
+.about b{color:var(--ink);font-weight:700}
+
+/* QR SCANNER */
+.qrScanner{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.qrScanner video{width:100%;max-width:320px;height:auto;border-radius:12px;background:#000}
+.qrScanner .closeQr{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center}
+.qrScanner .hint{color:rgba(255,255,255,.7);font-size:13px;text-align:center;padding:0 20px}
+
+/* SHEETS & TOASTS */
+#scr{position:absolute;inset:0;background:rgba(20,20,16,.42);display:none;align-items:flex-end;z-index:45;backdrop-filter:blur(2px)}
+#scr.on{display:flex}
+.sheet{width:100%;background:var(--paper);border-radius:32px 32px 0 0;padding:12px 22px 26px;max-height:82%;display:flex;flex-direction:column;animation:up .32s var(--ease);box-shadow:0 -8px 30px rgba(0,0,0,.2)}
+.grab{width:38px;height:4px;border-radius:100px;background:rgba(20,20,16,.15);margin:0 auto 14px}
+.sTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sTop h3{font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-.025em}
+.archRow{display:flex;align-items:center;gap:11px;background:var(--card);border-radius:14px;padding:11px 13px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
+.archRow:active{transform:scale(.98)}
+.archRow .ad{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.archRow .at{flex:1;min-width:0}
+.archRow .at b{display:block;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.archRow .at span{font-size:10.5px;color:var(--mut);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.archRow .ax{font-size:10px;color:var(--mut);font-weight:700;flex-shrink:0}
+#tst{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:100px;font-size:12px;font-weight:600;display:none;z-index:80;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:340px}
+#tst.on{display:flex;animation:tstIn .3s var(--ease)}
+#tst button{background:var(--y);color:#141410;padding:6px 12px;border-radius:100px;font-size:11px;font-weight:800;cursor:pointer}
+@keyframes tstIn{from{opacity:0;translate:0 20px}to{opacity:1;translate:0 0}}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fs{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.sc.on>.onbBody>*,.sc.on>*{animation:fs .35s ease}
+
+/* READ-ONLY THREAD */
+.readonlyThread .comp{display:none}
+.readonlyThread .tb .who{cursor:default}
+.readonlyThread .rb .act:not(:first-child){display:none}
+
+/* ═══════ NATIVE APP FEEL + POLISH ═══════ */
+@media (max-width:450px){
+  body{padding:0;background:var(--paper);align-items:flex-start;justify-content:flex-start}
+  #app{width:100vw;height:100dvh;border-radius:0;box-shadow:none;max-width:none;position:fixed;inset:0}
+  html,body{overscroll-behavior-y:none;overflow:hidden;touch-action:pan-y}
+  .panel,.hContent,.onbBody{-webkit-overflow-scrolling:touch}
+}
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (max-width:450px){
+    #app{padding-top: env(safe-area-inset-top);padding-bottom: env(safe-area-inset-bottom)}
+    .navbar{padding-bottom: calc(14px + env(safe-area-inset-bottom))}
+  }
+}
+
+/* Smooth page transitions */
+.sc{transition:opacity .25s ease}
+.sc.on{opacity:1}
+.sc:not(.on){opacity:0;pointer-events:none}
+
+/* Better button press feedback */
+.cta,.ico,.navItem,.pcard,.iceR,.mRow,.attTile,.jCard{transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease}
+.cta:active,.ico:active,.navItem:active,.pcard:active,.iceR:active,.mRow:active,.attTile:active,.jCard:active{transform:scale(.96)}
+
+/* Loading shimmer for images */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.mediaImg img{background:linear-gradient(90deg,var(--paperDark) 25%,var(--paper) 50%,var(--paperDark) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+
+/* Emoji reactions styling */
+.rb span{font-size:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.1));transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
+.rb span:hover{transform:scale(1.25)}
+
+/* Better empty states */
+.empty{animation:fs .5s ease}
+.empty .iceChips button{transition:all .15s}
+.empty .iceChips button:active{transform:scale(.92);background:rgba(255,217,61,.25)}
+
+/* Toast animation improvement */
+#tst{transition:transform .3s var(--ease),opacity .3s ease}
+
+/* Scrollbar hide but keep functionality */
+.hContent,.panel,.onbBody{scrollbar-width:none;-ms-overflow-style:none}
+
+/* Better focus states for accessibility */
+input:focus,textarea:focus{outline:none}
+.fld:focus-within{box-shadow:0 0 0 2px var(--y),var(--sh)}
+
+/* Sync badge in chat header */
+#syncBadge{transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+
+/* Live dot on home cards */
+.liveDot{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.8}}
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="app">
+
+<!-- ============ ONBOARDING ============ -->
+<div class="sc on notebook" id="o1">
+  <div class="onbHead">
+    <div class="logo"><div class="logoMark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18" stroke="#FFD93D" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="#FFD93D"/></svg></div>Hichki</div>
+    <div class="progress"><i class="on"></i><i></i><i></i></div>
+  </div>
+  <div class="onbBody">
+    <div><h1>Your quiet<br>corner —<br><em>a calm space<br>to be you.</em></h1><p class="sub" style="margin-top:14px;max-width:290px">Chats, music, notes. Made for solo moments and close conversations.</p></div>
+    <div class="hero">
+      <div class="fc fc1"><div class="cardTop"><div class="cAv"><svg viewBox="0 0 64 64" width="24" height="24"><path d="M14 42C12 24 20 9 32 9C44 9 52 24 50 42C49 35 45 29 40 28C39 36 36 40 32 40C28 40 25 36 24 28C19 29 15 35 14 42Z" fill="#2E241E"/><rect x="27" y="37" width="10" height="11" rx="3" fill="#F3C29B"/><ellipse cx="32" cy="28" rx="12" ry="13" fill="#F6CBA3"/><path d="M20 23C20 14 26 10 32 10C38 10 44 14 44 23C41 19 37 17 32 17C27 17 23 19 20 23Z" fill="#2E241E"/><path d="M24 29q3 2.3 6 0" stroke="#2E241E" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M34 29q3 2.3 6 0" stroke="#2E241E" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="23" cy="33" rx="2.4" ry="1.7" fill="#F49BAE" opacity=".75"/><ellipse cx="41" cy="33" rx="2.4" ry="1.7" fill="#F49BAE" opacity=".75"/><path d="M29 36.5q3 2 6 0" stroke="#B5502F" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M13 58C13 47 21 43 32 43C43 43 51 47 51 58Z" fill="#FFD05C"/><circle cx="32" cy="47" r="2" fill="#F2789A"/><path d="M32 47l-4.5 3.5M32 47l4.5 3.5" stroke="#F2789A" stroke-width="2.2" stroke-linecap="round"/></svg></div><div class="cName">Sara</div><span class="cSub">2m</span></div><div class="miniChat"><div class="miniBub them">Coffee tomorrow? ☕</div><div class="miniBub me">Yes, 4pm!</div></div></div>
+      <div class="fc fc2"><div class="mBadge"><i></i>NOW PLAYING</div><div class="cardTop" style="margin-bottom:8px"><div class="cover"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div style="min-width:0"><div class="cName" style="font-size:12.5px">Ilahi</div><div class="cSub" style="margin:0;font-size:9.5px;opacity:.7">Arijit Singh</div></div></div><div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="fc fc3"><div class="badge"><i></i>COMING SOON</div><h6>AI Notes</h6><p>"Summarise my week…"</p></div>
+    </div>
+    <div class="principles">
+      <div class="pri"><div class="pd y"></div><div class="t">For your moments and your five.<small>Chat with them. Journal for you.</small></div></div>
+      <div class="pri"><div class="pd p"></div><div class="t">No read receipts, no online dots.<small>Zero surveillance, zero anxiety.</small></div></div>
+      <div class="pri"><div class="pd g"></div><div class="t">Everything stays on your device.<small>No accounts. No cloud. Just you.</small></div></div>
+    </div>
+  </div>
+  <div class="onbFooter"><button class="cta" onclick="haptic('light');goStep(2)">I'm in <i><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></button></div>
+</div>
+
+<div class="sc notebook" id="o2">
+  <div class="onbHead"><button class="skip" onclick="goStep(1)">← Back</button><div class="progress"><i class="done"></i><i class="on"></i><i></i></div></div>
+  <div class="onbBody"><div style="width:100%"><h1>First,<br><em>who are you?</em></h1><p class="sub">Just for your circle. Nothing leaves this device.</p><div class="avPreview" id="avPrev">?</div><div class="field"><label>Your name</label><input id="oName" placeholder="What friends call you" maxlength="24" autocomplete="off"/></div><div class="field"><label>Pick your colour</label><div class="colorPicker" id="mePicker"></div></div></div></div>
+  <div class="onbFooter"><button class="cta" id="o2Next" disabled onclick="haptic('light');goStep(3)">Continue <i><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></button></div>
+</div>
+
+<div class="sc notebook" id="o3">
+  <div class="onbHead"><button class="skip" onclick="goStep(2)">← Back</button><div class="progress"><i class="done"></i><i class="done"></i><i class="on"></i></div></div>
+  <div class="onbBody"><div style="width:100%"><div style="text-align:center"><div class="oneTime"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg>One-time setup</div></div><h1>Add<br><em>your first person.</em></h1><p class="sub">Up to 4 more, anytime later.</p><div class="pairPreview"><div class="av" id="meAv2">?</div><div class="conn"><i></i><i></i><i></i></div><div class="av" id="themAv">?</div></div><div class="field"><label>Their name</label><input id="fpName" placeholder="e.g. Sara, Mom, Rohit" maxlength="24" autocomplete="off"/></div><div class="field"><label>Their colour</label><div class="colorPicker" id="themPicker"></div></div></div></div>
+  <div class="onbFooter"><button class="cta" id="o3Next" disabled onclick="completeOnboarding()">Enter your corner <i><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></i></button><button class="cta secondary" onclick="skipFirstPerson()">Skip — I'll add later</button></div>
+</div>
+
+<div class="sc notebook" id="o4">
+  <div class="onbBody"><div class="celebrate" id="celebrate"><div class="bigAv" id="bigAv">?</div><h1>You're all set,<br><em id="cName">friend</em>.</h1><p class="sub" style="margin-top:10px;max-width:260px;margin-left:auto;margin-right:auto" id="cSubTxt"></p></div></div>
+  <div class="onbFooter"><button class="cta" onclick="enterApp()">Enter your corner <i><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></button></div>
+</div>
+
+<!-- ============ HOME / CIRCLE ============ -->
+<div class="sc notebook" id="h">
+  <div class="hContent">
+    <div class="hdr"><div class="date" id="dToday"></div><div class="avme" id="hAv" onclick="go('s')"></div></div>
+    <h2 id="hGreet"></h2>
+    <p class="subtitle" id="hSub"></p>
+    <button class="cta" onclick="handleNewNote()">Write a new note <i><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4z"/></svg></i></button>
+    <div class="sh"><div><h4>Your circle</h4><p class="why">Yellow chip = a gentle nudge to write.</p></div><b onclick="sheet('editCircle')" id="editCircleBtn">Edit</b></div>
+    <div id="circleWrap"></div>
+    <div class="sh"><div><h4>Today</h4><p class="why">Gentle suggestions from your space.</p></div></div>
+    <div class="todayList" id="todayList"></div>
+  </div>
+  <div class="navbar">
+    <div class="navItem active" onclick="haptic('selection')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-4.9 7.6 8.5 8.5 0 01-9.3-1.8L3 21l1.9-5.7a8.5 8.5 0 011.8-9.3A8.38 8.38 0 0114.5 3a8.5 8.5 0 016.5 8.5z"/></svg><span>Circle</span></div>
+    <div class="navItem" onclick="haptic('selection');go('j')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Journal</span></div>
+    <div class="navItem" onclick="haptic('selection');go('m')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Music</span></div>
+  </div>
+</div>
+
+<!-- ============ CHAT ============ -->
+<div class="sc plain" id="c">
+  <div class="tb">
+    <button class="ico" onclick="go('h')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button>
+    <div class="who" id="who" onclick="openProfile()" style="position:relative"><span id="syncBadge" style="position:absolute;right:2px;top:2px;width:8px;height:8px;border-radius:50%;background:var(--mut);border:2px solid var(--card);transition:all .3s cubic-bezier(.34,1.56,.64,1);opacity:0;z-index:2;box-shadow:0 0 4px rgba(0,0,0,.15)"></span></div>
+    <button class="ico g" onclick="haptic('selection');sheet('opt')"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+  </div>
+  <div id="cn"></div>
+  <div id="cs"></div>
+  <div style="position:relative;flex:1;display:flex;flex-direction:column;margin:0 6px">
+    <div class="panel" id="panel"></div>
+    <div class="rb" id="rb">
+      <span onclick="rx('❤️')">❤️</span><span onclick="rx('😂')">😂</span><span onclick="rx('🔥')">🔥</span><span onclick="rx('👍')">👍</span>
+      <span class="act" onclick="startReply()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-5-5 5-5M4 9h9a7 7 0 017 7v3"/></svg></span>
+      <span class="act" onclick="saveToJournal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>
+      <span class="act" onclick="shareMsg()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></span>
+      <span class="act" onclick="delMsg()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg></span>
+      <b onclick="hideRx()">×</b>
+    </div>
+  </div>
+  <div class="replyBar" id="replyBar"><div class="info"><b>Replying to <span id="rbName"></span></b><p id="rbText"></p></div><div class="close" onclick="cancelReply()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div>
+  <div class="comp">
+    <button class="plusBtn" onclick="haptic('selection');sheet('attach')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="fld" id="fld"><input id="inp" placeholder="Write your note…" onkeydown="if(event.key==='Enter')send()" oninput="tog()"/></div>
+    <button class="send off" id="sb" onclick="send()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-3-6z"/></svg></button>
+  </div>
+</div>
+
+<!-- ============ JOURNAL ============ -->
+<div class="sc notebook" id="j">
+  <div class="hContent">
+    <div class="hdr"><div class="date" id="jToday"></div><div class="avme" id="jAv" onclick="go('s')"></div></div>
+    <h2>Your <em>journal</em>.</h2><p class="subtitle">Private thoughts. Only you can read these.</p>
+    <button class="cta slim" onclick="newEntry()">Write a new entry <i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></i></button>
+    <div class="sh"><div><h4>Entries</h4><p class="why" id="jCount"></p></div><b id="jAllBtn" onclick="sheet('archive')" style="display:none">Browse all</b></div>
+    <div id="jList"></div>
+  </div>
+  <div class="navbar">
+    <div class="navItem" onclick="haptic('selection');go('h')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-4.9 7.6 8.5 8.5 0 01-9.3-1.8L3 21l1.9-5.7a8.5 8.5 0 011.8-9.3A8.38 8.38 0 0114.5 3a8.5 8.5 0 016.5 8.5z"/></svg><span>Circle</span></div>
+    <div class="navItem active" onclick="haptic('selection')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Journal</span></div>
+    <div class="navItem" onclick="haptic('selection');go('m')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Music</span></div>
+  </div>
+</div>
+
+<!-- ============ JOURNAL EDITOR ============ -->
+<div class="sc notebook" id="je">
+  <div class="tb" style="padding:18px 20px 6px">
+    <button class="ico" onclick="closeEntry()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button>
+    <div class="colorPicker" id="jeMood" style="gap:6px"></div>
+    <button class="ico g" onclick="haptic('selection');openJournalOpts(curEntryId)"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+  </div>
+  <div style="padding:6px 24px 4px;display:flex;justify-content:space-between" class="date"><span id="jeDate"></span><span id="jeWords"></span></div>
+  <div style="flex:1;overflow-y:auto;padding:8px 24px 24px">
+    <input id="jeTitle" placeholder="Title this entry…" class="jeTitle" oninput="autoSaveEntry()"/>
+    <textarea id="jeText" placeholder="Let it out…" class="jeText" oninput="autoSaveEntry()"></textarea>
+  </div>
+</div>
+
+<!-- ============ MUSIC ============ -->
+<div class="sc notebook" id="m">
+  <div class="hContent">
+    <div class="hdr"><div class="date" id="mToday"></div><div class="avme" id="mAv" onclick="go('s')"></div></div>
+    <h2>Your <em>soundtrack</em>.</h2><p class="subtitle">Music for the moments in between.</p>
+    <div class="player">
+      <button class="pShare" onclick="shareTrack()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></button>
+      <div class="vinylRow"><div class="albumArt" id="albumArt"></div><svg class="tonearm" id="tonearm" width="34" height="34" viewBox="0 0 34 34"><circle cx="27" cy="7" r="3.4" fill="#EFEDE6"/><line x1="27" y1="7" x2="12" y2="23" stroke="#EFEDE6" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="23" r="2.2" fill="#FFD93D"/></svg></div>
+      <div class="trackInfo"><h5 id="pTitle">Select a track</h5><p id="pArtist">to play</p></div>
+      <div class="progRow" id="progWrap" style="display:none;">
+        <span id="pTimeCur">0:00</span>
+        <div class="prog" onclick="seekAudio(event)"><i id="progFill"></i></div>
+        <span id="pTimeTot">0:00</span>
+      </div>
+      <div class="wave big paused" id="pWave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="transport" id="transport">
+        <button class="tBtn" onclick="prevTrack()"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM20 6L9 12l11 6z"/></svg></button>
+        <button class="tBtn main" id="playBtn" onclick="togglePlay()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" id="playIcon"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="tBtn" onclick="nextTrack()"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM4 6l11 6-11 6z"/></svg></button>
+      </div>
+      <div id="linkAction" style="display:none; justify-content:center; padding:10px 0;">
+        <button class="cta slim" style="max-width:220px;background:var(--paper);color:var(--ink)" id="linkActionBtn">Open Link</button>
+      </div>
+    </div>
+    <div class="sh"><div><h4>Library</h4><p class="why">Tap to play · heart to save · arrow to share.</p></div></div>
+    <div class="mActionRow">
+      <button onclick="$('fAudio').click()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Import Audio</button>
+      <button onclick="sheet('addMusicLink')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> Paste Link</button>
+    </div>
+    <div id="mList"></div>
+  </div>
+  <div class="navbar">
+    <div class="navItem" onclick="haptic('selection');go('h')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-4.9 7.6 8.5 8.5 0 01-9.3-1.8L3 21l1.9-5.7a8.5 8.5 0 011.8-9.3A8.38 8.38 0 0114.5 3a8.5 8.5 0 016.5 8.5z"/></svg><span>Circle</span></div>
+    <div class="navItem" onclick="haptic('selection');go('j')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Journal</span></div>
+    <div class="navItem active" onclick="haptic('selection')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Music</span></div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="sc notebook" id="s">
+  <div class="hdr" style="padding:22px 22px 0"><button class="ico" onclick="go('h')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button><h2 class="serif" style="margin-left:12px;font-size:24px;letter-spacing:-.025em">Settings</h2></div>
+  <div style="padding:22px;overflow-y:auto">
+    <div style="text-align:center;margin-bottom:26px"><div class="avme" id="sAv" style="width:78px;height:78px;font-size:24px;margin:0 auto 12px"></div><div class="serif" style="font-weight:700;font-size:20px;letter-spacing:-.02em" id="sName"></div><p class="sub" id="sMeta" style="margin-top:4px"></p></div>
+    <div class="setGroup"><div class="lbl">Preferences</div>
+      <div class="setRow" onclick="toggle('sound')"><div class="icn" style="background:var(--y)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM19 5c2 3 2 11 0 14M15 9c1 2 1 4 0 6"/></svg></div><div class="t">Sound<small>Subtle send tone</small></div><div class="toggle" id="tgSound"></div></div>
+      <div class="setRow" onclick="toggle('haptics')"><div class="icn" style="background:var(--peach)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M2 8v2M2 14v2M22 8v2M22 14v2"/></svg></div><div class="t">Haptics<small>Gentle taps on actions</small></div><div class="toggle" id="tgHaptics"></div></div>
+      <div class="setRow" onclick="toggle('quiet')"><div class="icn" style="background:var(--l)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></svg></div><div class="t">Quiet hours<small>No pings after 10pm</small></div><div class="toggle" id="tgQuiet"></div></div>
+    </div>
+    <div class="setGroup"><div class="lbl">Data & Backup</div>
+      <div class="setRow" onclick="exportData()"><div class="icn" style="background:var(--g)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14M6 11l6 6 6-6M4 21h16"/></svg></div><div class="t">Export all data<small>Download as JSON</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      <div class="setRow" onclick="$('fImport').click()"><div class="icn" style="background:var(--sky)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><div class="t">Import backup<small>Restore from JSON file</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      <input type="file" id="fImport" accept=".json" hidden>
+      <div class="setRow" onclick="fullReset()"><div class="icn" style="background:var(--coral)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></div><div class="t">Reset all data<small>Start fresh</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    </div>
+    <div class="setGroup"><div class="lbl">Sharing (QR)</div>
+      <div class="setRow" onclick="sheet('qrShare')"><div class="icn" style="background:var(--p)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18M3 3l6 6M15 3l-6 6M3 15l6 6M15 15l-6 6"/></svg></div><div class="t">Share thread via QR<small>Export signed, import read-only</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      <div class="setRow" onclick="openQrScanner()"><div class="icn" style="background:var(--peach)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg></div><div class="t">Scan QR to import<small>Receive shared thread</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+    </div>
+    <div class="about"><b>Hichki</b> — v2.1<br><span style="font-family:'Fraunces',serif;font-style:italic">Your quiet corner.</span><br>Made with slow intent.</div>
+  </div>
+</div>
+
+<!-- ============ QR SCANNER OVERLAY ============ -->
+<div class="qrScanner" id="qrScanner">
+  <video id="qrVideo" playsinline muted></video>
+  <div class="hint">Point camera at QR code<br>Shared thread will be imported as read-only</div>
+  <button class="closeQr" onclick="closeQrScanner()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<!-- ============ SHEETS & TOASTS ============ -->
+<div id="scr" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet"><div class="grab"></div><div class="sTop"><h3 id="sT"></h3><button class="ico g sm" onclick="closeSheet()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div style="overflow-y:auto" id="sB"></div></div>
+</div>
+<div id="tst"><span id="tstMsg"></span><button id="tstBtn" onclick="undoLast()">Undo</button></div>
+
+<!-- ============ HIDDEN INPUTS & AUDIO ============ -->
+<input type="file" id="fPhoto" accept="image/*" hidden>
+<input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fVid" accept="video/*" hidden>
+<input type="file" id="fAudio" accept="audio/*" multiple hidden>
+<input type="file" id="fAny" hidden>
+<audio id="audioPlayer" hidden></audio>
+</div>
+
+<script>
+/* =====================================================================================
+   HICHKI v2.1 — Your quiet corner (Local-first, PWA-ready, QR-sharing framework)
+   ===================================================================================== */
+
+const KEY = 'hichki.v7';
+const COLORS = [{v:'#FFBC94'},{v:'#F7BBD8'},{v:'#8BE3AE'},{v:'#FFD93D'},{v:'#CFC8F7'},{v:'#A6D8F0'},{v:'#FFA69E'}];
+let idCounter = 1;
+
+let DB = (() => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.me) return d; } catch(e) {} return null; })();
+
+function freshDB(name, color) {
+  return {
+    me: { name: name || '', color: color || '#FFBC94', keyPair: null },
+    circle: [], notes: {}, journal: [], favorites: [], music: [],
+    prefs: { sound: true, quiet: true, haptics: true },
+    dataVersion: 2,
+    sharedThreads: {}
+  };
+}
+function initDB(){
+  DB = freshDB(onbMe.name, onbMe.color);
+  generateKeyPair().then(kp => { DB.me.keyPair = kp; save(); });
+}
+function save(){ try { DB && localStorage.setItem(KEY, JSON.stringify(DB)); } catch(e){ toast('Storage full — remove some media'); } }
+
+if (DB) {
+  DB.journal = DB.journal || []; DB.favorites = DB.favorites || []; DB.prefs = DB.prefs || {};
+  DB.music = DB.music || []; DB.notes = DB.notes || {}; DB.circle = DB.circle || [];
+  DB.sharedThreads = DB.sharedThreads || {};
+  if (DB.prefs.sound === undefined) DB.prefs.sound = true;
+  if (DB.prefs.quiet === undefined) DB.prefs.quiet = true;
+  if (DB.prefs.haptics === undefined) DB.prefs.haptics = true;
+  if (!DB.dataVersion) {
+    DB.dataVersion = 2;
+    DB.journal.forEach(e => { if (!e.createdAt) e.createdAt = e.t || Date.now(); if (!e.editedAt) e.editedAt = e.t || Date.now(); e.pinned = !!e.pinned; });
+    if (DB.favorites.length && typeof DB.favorites[0] === 'number' && DB.favorites[0] < 1000) {
+      DB.favorites = DB.favorites.map(i => DB.music[i] ? DB.music[i].id : null).filter(Boolean);
+    }
+  }
+  if (!DB.me.keyPair) generateKeyPair().then(kp => { DB.me.keyPair = kp; save(); });
+  let maxId = 0;
+  DB.music.forEach(m => { if (m.id > maxId) maxId = Math.floor(m.id); });
+  idCounter = maxId + 1;
+  DB.circle.forEach(p => { if (p.id > maxId) maxId = p.id; });
+  idCounter = Math.max(idCounter, maxId + 1);
+}
+
+const $ = id => document.getElementById(id);
+const audioEl = $('audioPlayer');
+let curTrackId = null, playing = false, progPct = 0;
+let A = null, SEL = null, REPLY = null;
+let onbMe = { name:'', color:'#FFBC94' }, onbFP = { name:'', color:'#F7BBD8' };
+let lastDeleted = null, curEntryId = null;
+let jEntries = [], jIdx = 0;
+const sessionBlobs = {};
+let tt = null;
+let qrScanner = null;
+let _confirmCb = null;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ini = n => n ? n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
+const notes = i => (DB.notes[i] = DB.notes[i] || []);
+const last = i => { const a = notes(i); return a[a.length-1]; };
+const findPerson = id => DB.circle.find(p => p.id === id);
+const sharedThread = pid => DB.sharedThreads[pid];
+
+const clock = t => { const d = new Date(t), h = d.getHours(); return `${h%12||12}:${String(d.getMinutes()).padStart(2,'0')} ${h>=12?'pm':'am'}`; };
+const dayL = t => { const d = new Date(t), n = new Date(); const g = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); const k = (g(n) - g(d)) / 86400000; return k === 0 ? 'Today' : k === 1 ? 'Yesterday' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); };
+function hexToRgba(hex, a){ const h=(hex||'#FFD93D').replace('#',''); return `rgba(${parseInt(h.substring(0,2),16)},${parseInt(h.substring(2,4),16)},${parseInt(h.substring(4,6),16)},${a})`; }
+function soften(hex, amt){ const h = (hex || '#FFD93D').replace('#',''); const mix = c => Math.round(c + (255 - c) * amt); return `rgb(${mix(parseInt(h.substring(0,2),16))},${mix(parseInt(h.substring(2,4),16))},${mix(parseInt(h.substring(4,6),16))})`; }
+const bytes = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(0) + ' KB' : (n/1048576).toFixed(1) + ' MB';
+const isValidUrl = u => /^https?:\/\//i.test(u);
+
+function shareText(title, text){ if (navigator.share) { navigator.share({ title, text }).catch(()=>{}); } else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')); } else toast('Copied to clipboard'); haptic('light'); }
+
+/* ------------------------------ CRYPTO (ECDSA P-256) ------------------------------ */
+async function generateKeyPair(){
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const pub = await crypto.subtle.exportKey('raw', kp.publicKey);
+  const prv = await crypto.subtle.exportKey('pkcs8', kp.privateKey);
+  return { publicKey: btoa(String.fromCharCode(...new Uint8Array(pub))), privateKey: btoa(String.fromCharCode(...new Uint8Array(prv))) };
+}
+async function importPublicKey(b64){ const raw = new Uint8Array(atob(b64).split('').map(c => c.charCodeAt(0))); return crypto.subtle.importKey('raw', raw, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['verify']); }
+async function importPrivateKey(b64){ const raw = new Uint8Array(atob(b64).split('').map(c => c.charCodeAt(0))); return crypto.subtle.importKey('pkcs8', raw, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']); }
+async function signData(privateKeyB64, data){ const key = await importPrivateKey(privateKeyB64); const msg = new TextEncoder().encode(JSON.stringify(data)); const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, msg); return btoa(String.fromCharCode(...new Uint8Array(sig))); }
+async function verifySignature(publicKeyB64, data, signatureB64){ const key = await importPublicKey(publicKeyB64); const msg = new TextEncoder().encode(JSON.stringify(data)); const sig = new Uint8Array(atob(signatureB64).split('').map(c => c.charCodeAt(0))); return crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, sig, msg); }
+
+/* ------------------------------ FEEDBACK ------------------------------ */
+const HAPTICS = { light:[8], medium:[16], selection:[5], success:[10,45,16], warning:[16,55,16], error:[22,45,22] };
+function haptic(type='light'){ if (DB && DB.prefs && DB.prefs.haptics === false) return; try { if (navigator.vibrate) navigator.vibrate(HAPTICS[type] || HAPTICS.light); } catch(e){} }
+let audioCtx = null;
+function playTone(f=520, d=0.08, type='sine'){ if (!DB || !DB.prefs || !DB.prefs.sound) return; try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(.08, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + d); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d); } catch(e){} }
+function toast(m){ const t = $('tst'); $('tstMsg').textContent = m; $('tstBtn').style.display = 'none'; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('on'), 2000); }
+function toastUndo(m){ const t = $('tst'); $('tstMsg').textContent = m; $('tstBtn').style.display = ''; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(()=>{ t.classList.remove('on'); lastDeleted = null; }, 4000); }
+function hideToast(){ $('tst').classList.remove('on'); clearTimeout(tt); }
+
+function hichkiConfirm(message, cb){ _confirmCb = cb; $('sT').textContent = 'Just checking'; $('sB').innerHTML = `<div style="text-align:center;padding:6px 0 4px;font-size:30px">🙂</div><p style="font-size:13.5px;color:var(--mut);text-align:center;line-height:1.55;padding:10px 4px 22px">${esc(message)}</p><button class="cta slim" style="background:var(--coral);color:var(--ink)" onclick="_doConfirm()">Yes, continue</button><button class="cta secondary" onclick="closeSheet()">Cancel</button>`; $('scr').classList.add('on'); }
+const _doConfirm = () => { closeSheet(); const cb = _confirmCb; _confirmCb = null; if (cb) cb(); };
+
+/* ------------------------------ NAVIGATION / SHELL ------------------------------ */
+function go(s){ document.querySelectorAll('.sc').forEach(x => x.classList.remove('on')); const el = $(s); if (!el) return; el.classList.add('on'); hideRx(); cancelReply(); document.body.classList.toggle('readonlyThread', false); if (s === 'h') { A = null; home(); } if (s === 's') renderSettings(); if (s === 'o2') renderStep2(); if (s === 'o3') renderStep3(); if (s === 'o4') renderStep4(); if (s === 'j') renderJournal(); if (s === 'm') renderMusic(); }
+function boot(){ if (!DB || !DB.me) go('o1'); else go('h'); }
+const goStep = n => go('o' + n);
+
+/* ------------------------------ ONBOARDING ------------------------------ */
+function renderStep2(){ $('oName').value = onbMe.name; $('avPrev').style.background = onbMe.color; $('avPrev').textContent = onbMe.name ? ini(onbMe.name) : '?'; const pick = $('mePicker'); pick.innerHTML = COLORS.map(c => `<div class="swatch ${c.v===onbMe.color?'on':''}" data-c="${c.v}" style="background:${c.v}"></div>`).join(''); pick.querySelectorAll('.swatch').forEach(sw => sw.onclick = () => { pick.querySelectorAll('.swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); onbMe.color = sw.dataset.c; $('avPrev').style.background = onbMe.color; haptic('selection'); }); $('oName').oninput = () => { onbMe.name = $('oName').value.trim(); $('avPrev').textContent = onbMe.name ? ini(onbMe.name) : '?'; $('o2Next').disabled = !onbMe.name; }; $('o2Next').disabled = !onbMe.name; setTimeout(() => $('oName').focus(), 300); }
+function renderStep3(){ if (!onbMe.name) { goStep(2); return; } $('meAv2').style.background = onbMe.color; $('meAv2').textContent = ini(onbMe.name); $('fpName').value = onbFP.name; $('themAv').style.background = onbFP.color; $('themAv').textContent = onbFP.name ? ini(onbFP.name) : '?'; const pick = $('themPicker'); pick.innerHTML = COLORS.map(c => `<div class="swatch ${c.v===onbFP.color?'on':''}" data-c="${c.v}" style="background:${c.v}"></div>`).join(''); pick.querySelectorAll('.swatch').forEach(sw => sw.onclick = () => { pick.querySelectorAll('.swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); onbFP.color = sw.dataset.c; $('themAv').style.background = onbFP.color; haptic('selection'); }); $('fpName').oninput = () => { onbFP.name = $('fpName').value.trim(); $('themAv').textContent = onbFP.name ? ini(onbFP.name) : '?'; $('o3Next').disabled = !onbFP.name; }; $('o3Next').disabled = !onbFP.name; setTimeout(() => $('fpName').focus(), 300); }
+function completeOnboarding(){ if (!onbFP.name) { toast('Name required'); return; } initDB(); DB.circle.push({ id: idCounter++, n: onbFP.name, who: 'friend', c: onbFP.color, addedAt: Date.now() }); save(); playTone(660,.15); setTimeout(()=>playTone(880,.2),100); goStep(4); }
+function skipFirstPerson(){ initDB(); save(); playTone(660,.12); goStep(4); }
+function enterApp(){ go('h'); }
+function renderStep4(){ if (!DB) { initDB(); save(); } $('bigAv').style.background = onbMe.color || DB.me.color; $('bigAv').textContent = ini(onbMe.name || DB.me.name); $('cName').textContent = (onbMe.name || DB.me.name).split(' ')[0]; $('cSubTxt').textContent = DB.circle.length ? `You and ${DB.circle[0].n.split(' ')[0]} are ready.` : 'Your corner awaits. Add people whenever you want.'; const wrap = $('celebrate'); wrap.querySelectorAll('.confetti').forEach(c => c.remove()); const colors = ['#FFD93D','#F7BBD8','#8BE3AE','#CFC8F7','#FFBC94','#A6D8F0']; for (let i = 0; i < 24; i++){ const c = document.createElement('div'); c.className = 'confetti'; c.style.background = colors[i % colors.length]; c.style.left = '50%'; c.style.top = '30%'; const a = (i/24) * Math.PI * 2, d = 120 + Math.random() * 80; c.style.setProperty('--tx', Math.cos(a) * d + 'px'); c.style.setProperty('--ty', Math.sin(a) * d + 'px'); c.style.animationDelay = (i * .02) + 's'; wrap.appendChild(c); } haptic('success'); }
+
+/* ------------------------------ HOME / TODAY ------------------------------ */
+function home(){ $('dToday').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}); $('hAv').style.background = DB.me.color; $('hAv').textContent = ini(DB.me.name); const hr = new Date().getHours(); const g = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : hr < 21 ? 'Good evening' : 'Good night'; $('hGreet').innerHTML = `${g},<br><em>${esc(DB.me.name.split(' ')[0])}</em>.`; $('hSub').textContent = DB.circle.length ? `${DB.circle.length} ${DB.circle.length===1?'person':'people'} in your circle.` : 'Your circle is empty — add someone.'; $('editCircleBtn').style.display = DB.circle.length ? '' : 'none'; const wrap = $('circleWrap'); if (!DB.circle.length){ wrap.innerHTML = `<div class="emptyCircle"><svg width="42" height="42" viewBox="0 0 48 48" fill="none" stroke="#141410" stroke-width="1.8" stroke-linecap="round"><circle cx="24" cy="18" r="7"/><path d="M10 40c0-8 6-14 14-14s14 6 14 14"/></svg><h5>No one here yet</h5><p>Add up to 5 close friends.</p><button class="cta slim" style="max-width:200px;margin:0 auto" onclick="sheet('addPerson')">Add someone</button></div>`; } else { let html = '<div class="circle">' + DB.circle.map(p => { const m = last(p.id), mins = m ? (Date.now() - m.t)/60000 : Infinity, warm = mins > 1440; const s = !m ? 'say hi' : mins < 60 ? Math.round(mins)+'m' : mins < 1440 ? Math.round(mins/60)+'h' : Math.round(mins/1440)+'d'; return `<div class="pcard" onclick="open_(${p.id})"><div class="a" style="background:${p.c}">${ini(p.n)}</div><h5>${esc(p.n)}</h5><div class="last">${esc(preview(m))}</div><span class="since ${warm?'warm':''}">${s}</span></div>`; }).join(''); html += DB.circle.length < 5 ? `<div class="pcard addNew" onclick="sheet('addPerson')"><div class="plus"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div><h5>Add</h5><div class="last">${5-DB.circle.length} left</div></div>` : `<div class="pcard full"><div class="emoji">✨</div><h5>Complete</h5><div class="last">Five is enough</div></div>`; wrap.innerHTML = html + '</div>'; } renderToday(); }
+function renderToday(){ const cards = []; const todayStart = new Date().setHours(0,0,0,0); const hasJournalToday = DB.journal.some(e => e.createdAt >= todayStart || e.editedAt >= todayStart); if (!hasJournalToday) { cards.push({ title: 'Write one line about today', sub: 'Even a sentence counts.', act: "newEntry()" }); } else { const weekCount = DB.journal.filter(e => (e.createdAt||e.t) >= Date.now() - 7*86400000).length; if (weekCount > 2) cards.push({ title: 'Look back at your week', sub: `${weekCount} entries are waiting.`, act: "go('j')" }); } const oldFriend = DB.circle.find(p => { const m = last(p.id); return !m || (Date.now() - m.t > 3*86400000); }); if (oldFriend) cards.push({ title: `Reach out to ${oldFriend.n.split(' ')[0]}`, sub: "It's been a few days.", act: `open_(${oldFriend.id})` }); if (!DB.music || !DB.music.length) cards.push({ title: 'Build your soundtrack', sub: 'Import a song or save a link.', act: "go('m')" }); const favTrack = DB.favorites.length ? DB.music.find(m => m.id === DB.favorites[0]) : null; if (favTrack && DB.circle.length) cards.push({ title: 'Share a saved song', sub: `Send ${favTrack.t} to someone.`, act: `sendSongFromMusicById(${favTrack.id})` }); const finalCards = cards.slice(0, 2); finalCards.push({ title: 'Ask Hichki', sub: 'AI reflections & summaries', act: "sheet('askAI')", special: true }); $('todayList').innerHTML = finalCards.map(c => `<div class="iceR ${c.special ? 'askAi' : ''}" onclick="${c.act}"><span class="dot" style="${c.special ? 'background:var(--ink)' : 'background:var(--mut)'}"></span><div class="t" ${c.special ? 'style="font-family:\'Fraunces\',serif;font-weight:700"' : ''}>${esc(c.title)}<small>${esc(c.sub)}</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${c.special ? 'var(--ink)' : 'var(--mut)'}" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>`).join(''); }
+function handleNewNote(){ if (!DB.circle.length){ sheet('addPerson'); return; } sheet('pick'); }
+
+/* ------------------------------ REUSABLE BOTTOM SHEET ------------------------------ */
+function sheet(k, payload){ $('scr').classList.add('on'); const T = $('sT'), B = $('sB'); if (k === 'askAI'){ T.textContent = 'Ask Hichki'; B.innerHTML = `<div style="padding:10px 0;text-align:center"><div style="font-size:36px;margin-bottom:12px">✨</div><h4 class="serif" style="font-size:20px;margin-bottom:8px">Coming Soon</h4><p class="why" style="font-size:13px;max-width:280px;margin:0 auto">Requires AI connection in the full app. Stored data remains local until then.</p></div><div style="margin-top:16px"><div class="iceR" onclick="toast('Coming soon')"><span class="dot" style="background:var(--l)"></span><div class="t">Summarise my week</div></div><div class="iceR" onclick="toast('Coming soon')"><span class="dot" style="background:var(--p)"></span><div class="t">What have I been writing about?</div></div><div class="iceR" onclick="toast('Coming soon')"><span class="dot" style="background:var(--y)"></span><div class="t">Help me turn this thought into a message</div></div><div class="iceR" onclick="toast('Coming soon')"><span class="dot" style="background:var(--g)"></span><div class="t">Find a pattern in my journal</div></div></div><button class="cta slim" style="margin:20px auto 0;max-width:200px" onclick="closeSheet()">Got it</button>`; } if (k === 'pick'){ T.textContent = 'Write to…'; B.innerHTML = DB.circle.map(p => `<div class="iceR" onclick="closeSheet();open_(${p.id})"><div style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:${p.c};font-family:'Fraunces',serif">${ini(p.n)}</div><div class="t">${esc(p.n)}<small>${esc(p.who||'friend')}</small></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>`).join(''); } if (k === 'editCircle'){ T.textContent = 'Your circle'; let html = DB.circle.map(p => `<div class="iceR"><div style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:${p.c};font-family:'Fraunces',serif">${ini(p.n)}</div><div class="t">${esc(p.n)}</div><button style="padding:6px;color:var(--coral)" onclick="removePerson(${p.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg></button></div>`).join(''); html += DB.circle.length < 5 ? `<button class="cta slim" style="margin-top:16px" onclick="closeSheet();sheet('addPerson')">Add someone</button>` : `<div style="text-align:center;padding:20px;font-size:12px;color:var(--mut);font-weight:500">✨ Circle complete.</div>`; B.innerHTML = html; } if (k === 'addPerson'){ T.textContent = 'Add someone'; B.innerHTML = `<div class="field"><label>Their name</label><input id="npName" placeholder="e.g. Sara" maxlength="24"/></div><div class="field"><label>Their colour</label><div class="colorPicker" id="npColors">${COLORS.map((c,i)=>`<div class="swatch ${i===0?'on':''}" style="background:${c.v}" data-c="${c.v}"></div>`).join('')}</div></div><button class="cta slim" style="margin-top:16px" onclick="savePerson()">Add to circle</button>`; let np = COLORS[0].v; document.querySelectorAll('#npColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#npColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); np = sw.dataset.c; haptic('selection'); }); window._getNpColor = () => np; setTimeout(() => $('npName').focus(), 300); } if (k === 'opt'){ T.textContent = A.n; B.innerHTML = `<div class="iceR" onclick="clr()"><span class="dot" style="background:var(--y)"></span><span class="t">Clear this thread</span></div><div class="iceR" onclick="removePerson(${A.id})"><span class="dot" style="background:var(--coral)"></span><span class="t" style="color:var(--coral)">Remove from circle</span></div>`; } if (k === 'optJournal'){ T.textContent = 'Manage Note'; const e = DB.journal.find(x => x.id === curEntryId); if (!e) { closeSheet(); return; } B.innerHTML = `<div class="iceR" onclick="closeSheet();openEntry(${e.id})"><span class="dot" style="background:var(--ink)"></span><span class="t">Open Note</span></div><div class="iceR" onclick="sheet('renameNote')"><span class="dot" style="background:var(--accent)"></span><span class="t">Rename</span></div><div class="iceR" onclick="togglePinNote(${e.id})"><span class="dot" style="background:var(--g)"></span><span class="t">${e.pinned?'Unpin Note':'Pin to Top'}</span></div><div class="iceR" onclick="duplicateNote(${e.id})"><span class="dot" style="background:var(--sky)"></span><span class="t">Duplicate</span></div><div class="iceR" onclick="shareEntry(${e.id})"><span class="dot" style="background:var(--y)"></span><span class="t">Share Externally</span></div><div class="iceR" onclick="sendToCircle(${e.id})"><span class="dot" style="background:var(--p)"></span><span class="t">Send to Circle</span></div><div class="iceR" onclick="deleteEntry()"><span class="dot" style="background:var(--coral)"></span><span class="t" style="color:var(--coral)">Delete Note</span></div>`; } if (k === 'renameNote'){ T.textContent = 'Rename Note'; const e = DB.journal.find(x => x.id === curEntryId); B.innerHTML = `<div class="field"><input id="rnInput" value="${esc(e.title)}" placeholder="Note title..."/></div><button class="cta slim" onclick="saveNoteRename()">Save</button>`; setTimeout(() => $('rnInput').focus(), 300); } if (k === 'attach'){ T.textContent = 'Share something'; const tile = (i, lab, bg, svg) => `<div class="attTile" style="animation-delay:${i*40}ms" onclick="attach('${lab.toLowerCase()}')"><div class="ai" style="background:${bg}">${svg}</div><span>${lab}</span></div>`; const st = 'fill="none" stroke="#141410" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"'; B.innerHTML = '<div class="attGrid">' + [ tile(0,'Photo','#FFE9A8',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 16l-5-5-6 6"/></svg>`), tile(1,'Camera','#FFD8C2',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.4"/></svg>`), tile(2,'Video','#F9CFE4',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><rect x="3" y="6" width="12" height="12" rx="3"/><path d="M15 11l6-3v8l-6-3z"/></svg>`), tile(3,'File','#DCF3E5',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg>`), tile(4,'Music','#E0DBFA',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="17.5" cy="16" r="2.6"/></svg>`), tile(5,'Note','#CFE9F7',`<svg width="18" height="18" viewBox="0 0 24 24" ${st}><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`) ].join('') + '</div><p class="sub" style="text-align:center;margin-top:14px;font-size:11.5px">Stored on this device. Nothing uploads in this prototype.</p>'; } if (k === 'pickSong'){ T.textContent = 'Send a song'; B.innerHTML = DB.music.map(s => `<div class="mRow" onclick="sendSongFromSheet(${s.id})"><div class="mc" style="--sc:${s.c}"></div><div class="mi"><b>${esc(s.t)}</b><span>${esc(s.a)}</span></div></div>`).join(''); } if (k === 'pickNote'){ T.textContent = 'Send a journal note'; const list = (DB.journal||[]).filter(e => (e.title||'').trim() || (e.text||'').trim()).sort((a,b) => b.createdAt - a.createdAt); B.innerHTML = list.length ? list.map(e => `<div class="archRow" onclick="sendNote(${e.id})"><span class="ad" style="background:${e.mood||'#FFD93D'}"></span><div class="at"><b>${esc(e.title||'Untitled')}</b><span>${esc((e.text||'').slice(0,42))}</span></div><span class="ax">${dayL(e.createdAt||e.t)}</span></div>`).join('') : `<p class="sub" style="text-align:center;padding:18px">No journal entries yet.</p>`; } if (k === 'archive'){ T.textContent = 'All entries'; B.innerHTML = `<div class="fld" style="margin-bottom:14px;background:var(--card)"><input id="jSearch" placeholder="Search notes..." oninput="renderArchive()"/></div><div id="jArchiveList"></div>`; renderArchive(); } if (k === 'addMusicLink'){ T.textContent = 'Add a streaming link'; B.innerHTML = `<div class="field"><label>Link</label><input id="mlUrl" placeholder="YouTube, Spotify, etc." autocomplete="off"/></div><div class="field"><label>Title</label><input id="mlTitle" placeholder="Song or Playlist Name" autocomplete="off"/></div><div class="field"><label>Artist / Note</label><input id="mlArtist" placeholder="Optional" autocomplete="off"/></div><button class="cta slim" onclick="saveMusicLink()">Add Link</button>`; setTimeout(() => $('mlUrl').focus(), 300); } if (k === 'optMusic'){ const s = DB.music.find(x => x.id === window._optMusicId); if (!s) return; T.textContent = 'Manage Music'; const isFav = DB.favorites.includes(s.id); B.innerHTML = `<div class="iceR" onclick="closeSheet();${s.type==='link' ? `openMusicLink(${s.id})` : `selectTrackById(${s.id})`}"><span class="dot" style="background:var(--ink)"></span><span class="t">${s.type==='link'?'Open Link':'Play Track'}</span></div><div class="iceR" onclick="closeSheet();toggleFavById(${s.id})"><span class="dot" style="background:var(--g)"></span><span class="t">${isFav?'Unfavourite':'Favourite'}</span></div><div class="iceR" onclick="sheet('renameMusic')"><span class="dot" style="background:var(--accent)"></span><span class="t">Rename Metadata</span></div><div class="iceR" onclick="sendSongFromMusicById(${s.id})"><span class="dot" style="background:var(--p)"></span><span class="t">Send to Circle</span></div><div class="iceR" onclick="closeSheet();shareMusicById(${s.id})"><span class="dot" style="background:var(--y)"></span><span class="t">Share Externally</span></div><div class="iceR" onclick="closeSheet();removeMusicById(${s.id})"><span class="dot" style="background:var(--coral)"></span><span class="t" style="color:var(--coral)">Remove from Library</span></div>`; } if (k === 'renameMusic'){ T.textContent = 'Rename Metadata'; const s = DB.music.find(x => x.id === window._optMusicId); B.innerHTML = `<div class="field"><input id="rmTitle" value="${esc(s.t)}" placeholder="Title"/></div><div class="field"><input id="rmArtist" value="${esc(s.a)}" placeholder="Artist / Note"/></div><button class="cta slim" onclick="saveMusicRename()">Save</button>`; setTimeout(() => $('rmTitle').focus(), 300); } if (k === 'qrShare'){ T.textContent = 'Share via QR'; if (!A) { B.innerHTML = '<p class="sub" style="text-align:center;padding:20px">Open a chat first.</p>'; return; } B.innerHTML = `<div style="text-align:center;padding:10px"><div id="qrCanvasWrap"></div><p class="sub" style="margin-top:12px">Scan with another Hichki to import as read-only</p></div><button class="cta slim" style="margin-top:16px" onclick="downloadQR()">Save Image</button>`; generateQRForThread(A.id).then(canvas => { $('qrCanvasWrap').appendChild(canvas); }); } }
+const closeSheet = () => $('scr').classList.remove('on');
+
+window.renderArchive = () => { const q = ($('jSearch').value || '').toLowerCase(); const list = jEntries.filter(e => (e.title||'').toLowerCase().includes(q) || (e.text||'').toLowerCase().includes(q)); $('jArchiveList').innerHTML = list.length ? list.map(e => `<div class="archRow" onclick="closeSheet();openEntry(${e.id})"><span class="ad" style="background:${e.mood||'#FFD93D'}"></span><div class="at"><b>${esc(e.title||'Untitled')}</b><span>${esc((e.text||'').slice(0,44))||'Empty draft'}</span></div><span class="ax">${dayL(e.editedAt||e.createdAt||e.t)}</span></div>`).join('') : '<p class="sub" style="text-align:center;padding:18px">No matching entries.</p>'; };
+
+/* ------------------------------ QR CODE GENERATION (placeholder) ------------------------------ */
+function generateQRForThread(pid){ return new Promise(resolve => { const thread = exportThreadForQR(pid); const text = JSON.stringify(thread); const canvas = document.createElement('canvas'); canvas.width = 200; canvas.height = 200; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,200,200); ctx.fillStyle = '#141410'; ctx.font = '12px monospace'; ctx.textAlign = 'center'; ctx.fillText('HICHKI QR', 100, 90); ctx.fillText('Thread: ' + pid, 100, 110); resolve(canvas); }); }
+function downloadQR(){ const canvas = $('qrCanvasWrap').querySelector('canvas'); if (canvas) { const link = document.createElement('a'); link.download = `hichki-thread-${A.id}.png`; link.href = canvas.toDataURL('image/png'); link.click(); toast('QR saved to gallery'); } }
+
+/* ------------------------------ THREAD EXPORT/IMPORT (SIGNED) ------------------------------ */
+function exportThreadForQR(pid){ const msgs = notes(pid).map(m => ({ s: m.s, k: m.k, x: m.x, t: m.t, src: m.src, name: m.name, size: m.size, sid: m.sid, title: m.title, artist: m.artist, c: m.c, songId: m.songId, mood: m.mood, noteId: m.noteId, q: m.q, r: m.r })); return { v: 1, pid, person: { n: A.n, c: A.c }, me: { n: DB.me.name, c: DB.me.color, publicKey: DB.me.keyPair?.publicKey }, messages: msgs, exportedAt: Date.now() }; }
+async function signAndExportThread(pid){ const data = exportThreadForQR(pid); if (!DB.me.keyPair) { toast('Generating keys…'); await generateKeyPair().then(kp => { DB.me.keyPair = kp; save(); }); } const signature = await signData(DB.me.keyPair.privateKey, data); return { ...data, signature }; }
+async function importThreadFromQR(jsonText){ try { const packet = JSON.parse(jsonText); if (!packet.v || !packet.messages || !packet.signature || !packet.me?.publicKey) throw 'Invalid format'; const valid = await verifySignature(packet.me.publicKey, packet, packet.signature); if (!valid) throw 'Signature verification failed'; const pid = packet.pid; DB.sharedThreads[pid] = { messages: packet.messages, person: packet.person, me: packet.me, importedAt: Date.now(), verified: true }; save(); if (!findPerson(pid)) { DB.circle.push({ id: pid, n: packet.person.n, who: 'shared', c: packet.person.c, addedAt: Date.now(), readOnly: true }); } save(); toast(`Imported "${packet.person.n.split(' ')[0]}" (read-only)`); go('h'); } catch(e) { console.error(e); toast('Invalid or tampered QR data'); } }
+
+/* ------------------------------ QR SCANNER ------------------------------ */
+function openQrScanner(){ const scanner = $('qrScanner'); scanner.style.display = 'flex'; const video = $('qrVideo'); navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => { video.srcObject = stream; video.play(); startQrScan(video); }).catch(e => { toast('Camera permission needed'); scanner.style.display = 'none'; }); }
+function closeQrScanner(){ const scanner = $('qrScanner'); scanner.style.display = 'none'; const video = $('qrVideo'); if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; } if (qrScanner) { qrScanner.clear(); qrScanner = null; } }
+function startQrScan(video){ if (window.Html5Qrcode) { initScanner(video); return; } const s = document.createElement('script'); s.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'; s.onload = () => initScanner(video); s.onerror = () => toast('Failed to load scanner'); document.head.appendChild(s); }
+function initScanner(video){ qrScanner = new Html5Qrcode('qrVideo'); qrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 200 }, onQrSuccess, onQrError).catch(e => console.error(e)); }
+function onQrSuccess(decodedText){ closeQrScanner(); importThreadFromQR(decodedText); }
+function onQrError(err){}
+
+/* ------------------------------ CIRCLE PROFILE & PERSON ACTIONS ------------------------------ */
+function openProfile(){ if (!A) return; haptic('selection'); $('scr').classList.add('on'); $('sT').textContent = 'Profile'; const msgCount = notes(A.id).length; const since = A.addedAt ? new Date(A.addedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'a while ago'; const isRO = A.readOnly; $('sB').innerHTML = `<div style="text-align:center;margin-bottom:16px"><div class="avme" id="profAv" style="width:84px;height:84px;font-size:26px;margin:0 auto 14px;background:${A.c}">${ini(A.n)}</div><div class="colorPicker" id="profColors" style="justify-content:center"></div></div><div class="field"><label>Name</label><input id="profName" value="${esc(A.n)}" maxlength="24" ${isRO?'readonly':''}/></div><div style="display:flex;gap:10px;margin:14px 0 4px"><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:22px;font-weight:700">${msgCount}</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">notes total</div></div><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:13px;font-weight:700">${since}</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">in your circle since</div></div></div>${!isRO ? `<button class="cta secondary" style="color:var(--coral);margin-top:12px" onclick="closeSheet();removePerson(${A.id})">Remove from circle</button>` : `<div class="readonlyBadge" style="margin:12px auto 0;max-width:200px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V7c0-2.76-2.24-5-5-5S7 4.24 7 7v1H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg> Read-only shared thread</div>`}`; if (!isRO) { $('profColors').innerHTML = COLORS.map(c => `<div class="swatch ${c.v===A.c?'on':''}" data-c="${c.v}" style="background:${c.v}"></div>`).join(''); document.querySelectorAll('#profColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#profColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); A.c = sw.dataset.c; $('profAv').style.background = A.c; save(); haptic('selection'); tintChat(); draw(); }); } $('profName').oninput = () => { if (!isRO) A.n = $('profName').value.trim() || A.n; }; $('profName').onblur = () => { if (!isRO) { save(); $('who').innerHTML = `<span class="d" style="background:${A.c}"></span><span>${esc(A.n)}</span>`; $('cn').innerHTML = `A note to <em>${esc(A.n.split(' ')[0])}</em>`; } }; }
+function savePerson(){ const n = $('npName').value.trim(), c = window._getNpColor(); if (!n) { toast('Name required'); return; } const id = idCounter++; DB.circle.push({ id, n, who: 'friend', c, addedAt: Date.now() }); save(); closeSheet(); home(); playTone(660,.1); haptic('success'); toast(`${n.split(' ')[0]} added`); }
+function removePerson(id){ const p = findPerson(id); if (!p) return; hichkiConfirm(`Remove ${p.n}? Their chat history and notes will be deleted.`, () => { DB.circle = DB.circle.filter(x => x.id !== id); delete DB.notes[id]; save(); closeSheet(); haptic('warning'); if (A && A.id === id) { A = null; go('h'); } else home(); toast(`${p.n.split(' ')[0]} removed`); }); }
+
+/* ------------------------------ CHAT ------------------------------ */
+function preview(m){ if (!m) return 'Say hi'; if (m.k === 'img') return '📷 Photo'; if (m.k === 'vid') return '🎬 Video'; if (m.k === 'file') return '📄 ' + (m.name || 'File'); if (m.k === 'song') return '🎵 ' + (m.title || 'Song'); if (m.k === 'note') return '📓 ' + (m.title || 'Note'); return m.x || ''; }
+function tintChat(){ if (!A) return; $('fld').style.setProperty('--ringc', hexToRgba(A.c,.35)); const sb = $('sb'); sb.style.setProperty('--sendBg', A.c); sb.style.setProperty('--sendSh', hexToRgba(A.c,.45)); sb.style.setProperty('--sendOffBg', hexToRgba(A.c,.16)); sb.style.setProperty('--sendOffIcon', A.c); $('panel').style.setProperty('--panelGlow', hexToRgba(A.c,.14)); $('who').style.setProperty('--whoRing', hexToRgba(A.c,.5)); }
+function open_(id){ A = findPerson(id); if (!A) { go('h'); return; } const isRO = A.readOnly; document.body.classList.toggle('readonlyThread', isRO); go('c'); $('who').innerHTML = `<span class="d" style="background:${A.c}"></span><span>${esc(A.n)}</span>`; $('cn').innerHTML = `A note to <em>${esc(A.n.split(' ')[0])}</em>` + (isRO ? ' <span class="readonlyBadge" style="font-size:10px;margin-left:6px;vertical-align:middle">Read-only</span>' : ''); $('cs').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}).toUpperCase(); tintChat(); draw(); }
+function bubbleBody(m, i){ if (m.k === 'img') return `<span class="mediaImg"><img src="${m.src}" alt=""></span>${m.x ? `<div class="cap">${esc(m.x)}</div>` : ''}`; if (m.k === 'vid') { const src = m.sid && sessionBlobs[m.sid]; return `<div class="vidBub" onclick="chatOpenVideo('${m.sid}', event)"><div class="th"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div style="min-width:0"><div class="mBubName">${esc(m.name||'Video')}</div><div class="mBubSub">${src ? 'Tap to play' : 'Video unavailable after reload'}</div></div></div>`; } if (m.k === 'file') return `<div class="fileBub"><div class="fi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/></svg></div><div style="min-width:0"><div class="mBubName">${esc(m.name||'File')}</div><div class="mBubSub">${esc(m.size||'')}</div></div></div>`; if (m.k === 'song') return `<div class="songBub" onclick="chatPlaySong(${m.songId||0}, event)"><div class="sv" style="--sc:${m.c||'#FFD93D'}"></div><div style="min-width:0;flex:1"><div class="mBubName">${esc(m.title)}</div><div class="mBubSub">${esc(m.artist)}</div></div><div class="pl"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div>`; if (m.k === 'note') return `<div class="noteBub" style="--nc:${m.mood||'#FFD93D'}" onclick="chatOpenNote(${m.noteId||0}, event)"><div class="nl">Journal note</div><div class="nt">${esc(m.title||'Untitled')}</div><div class="np">${esc(m.text||'')}</div></div>`; return esc(m.x || ''); }
+function chatOpenVideo(sid, e){ if (e) e.stopPropagation(); const src = sessionBlobs[sid]; if (src) { $('scr').classList.add('on'); $('sT').textContent = 'Video'; $('sB').innerHTML = `<video src="${src}" controls autoplay style="width:100%;border-radius:12px;background:#000"></video>`; } else toast('Video unavailable after reload in this prototype.'); }
+function chatOpenNote(id, e){ if (e) e.stopPropagation(); if (DB.journal.find(x => x.id === id)) openEntry(id); else toast('Note unavailable'); }
+function chatPlaySong(id, e){ if (e) e.stopPropagation(); const track = DB.music.find(x => x.id === id); if (track) { if (track.type === 'link') { openMusicLink(id); return; } go('m'); selectTrackById(id); } else toast('Song unavailable'); }
+
+let lastRenderedIdx = -1;
+function draw(){ const p = $('panel'), M = A.readOnly ? (sharedThread(A.id)?.messages || []) : notes(A.id); if (!M.length) { p.innerHTML = `<div class="empty"><div><div style="width:56px;height:56px;border-radius:50%;background:${A.c};display:grid;place-items:center;margin:0 auto 14px;font-weight:800;color:#141410;font-size:17px;font-family:'Fraunces',serif">${ini(A.n)}</div><div style="color:var(--ptx);font-family:'Fraunces',serif;font-size:18px;font-weight:700;letter-spacing:-.02em">${A.readOnly ? 'Shared thread (read-only)' : 'Write to ' + esc(A.n.split(' ')[0])}</div><div style="color:var(--pmut);font-size:12px;max-width:220px;line-height:1.5;margin:6px auto 0">${A.readOnly ? 'This thread was shared via QR. You cannot reply.' : 'Start with anything — a moment, a song, a question.'}</div></div></div>`; return; } let h = '', dl = '', prev = ''; M.forEach((m, i) => { const L = dayL(m.t); if (L !== dl) { dl = L; prev = ''; h += `<div class="day"><span>${L}</span></div>`; } if (m.s !== prev) { prev = m.s; const name = m.s === 't' ? A.n.split(' ')[0] : (m.s === 'm' ? 'You' : 'Shared'); const color = m.s === 't' ? A.c : (m.s === 'm' ? DB.me.color : '#8BE3AE'); h += m.s === 't' ? `<div class="nameCap"><span class="a" style="background:${color}">${ini(name)}</span>${esc(name)}</div>` : `<div class="meCap">${esc(name)}<span class="a" style="background:${color}">${ini(name)}</span></div>`; } const nx = M[i+1], grp = nx && nx.s === m.s && (nx.t - m.t) < 180000; let content = ''; if (m.q) { const qMsg = M.find(x => x.t === m.q); if (qMsg) { const qn = qMsg.s === 'm' ? 'You' : A.n.split(' ')[0]; const qt = preview(qMsg); content += `<div class="qt"><b>${esc(qn)}</b>${esc(qt.slice(0,60))}${qt.length>60?'…':''}</div>`; } } content += bubbleBody(m, i); const pad0 = (m.k === 'img') ? ' pad0' : ''; const isNew = i > lastRenderedIdx; h += `<div class="msg ${m.s==='m'?'me':(m.s==='t'?'them':'shared')}"><div class="wr"><div class="bub${pad0}${isNew ? ' animate-in' : ''}" onclick="${A.readOnly ? '' : 'pick('+i+')'}">${content}</div>${m.r && !A.readOnly ? `<div class="rx">${m.r}</div>` : ''}${grp ? '' : `<div class="tm">${clock(m.t)}</div>`}</div></div>`; }); p.innerHTML = h; lastRenderedIdx = M.length - 1; bottom(); }
+const bottom = () => { const p = $('panel'); setTimeout(() => p.scrollTop = p.scrollHeight, 30); }
+function pick(i){ if (A.readOnly) return; SEL = i; $('rb').classList.add('on'); }
+function hideRx(){ SEL = null; const r = $('rb'); if (r) r.classList.remove('on'); }
+function rx(e){ if (SEL == null || A.readOnly) return; const m = notes(A.id)[SEL]; if (e) m.r = e; else delete m.r; save(); hideRx(); draw(); playTone(720,.06); haptic('light'); }
+function startReply(){ if (SEL == null || A.readOnly) return; REPLY = notes(A.id)[SEL]; $('rbName').textContent = REPLY.s === 'm' ? 'yourself' : A.n.split(' ')[0]; $('rbText').textContent = preview(REPLY); $('replyBar').classList.add('on'); hideRx(); $('inp').focus(); }
+function cancelReply(){ REPLY = null; const r = $('replyBar'); if (r) r.classList.remove('on'); }
+function shareMsg(){ if (SEL == null || !A || A.readOnly) return; shareText('Hichki note', preview(notes(A.id)[SEL])); hideRx(); }
+function delMsg(){ if (SEL == null || A.readOnly) return; const arr = notes(A.id); lastDeleted = { pid: A.id, idx: SEL, msg: arr.splice(SEL,1)[0] }; save(); hideRx(); draw(); playTone(300,.1); haptic('warning'); toastUndo('Message deleted'); }
+function undoLast(){ if (!lastDeleted) return; notes(lastDeleted.pid).splice(lastDeleted.idx, 0, lastDeleted.msg); lastDeleted = null; save(); if (A) draw(); hideToast(); toast('Restored'); }
+const tog = () => $('sb').classList.toggle('off', !$('inp').value.trim());
+function pushMsg(msg){ if (A.readOnly) return; if (REPLY) msg.q = REPLY.t; notes(A.id).push(msg); cancelReply(); save(); draw(); playTone(880,.08); haptic('medium'); }
+function send(){ const e = $('inp'), x = e.value.trim(); if (!x || !A || A.readOnly) return; pushMsg({ s:'m', k:'text', x, t: Date.now() }); e.value = ''; tog(); }
+function clr(){ if (A.readOnly) return; DB.notes[A.id] = []; save(); closeSheet(); draw(); toast('Cleared'); }
+
+function saveToJournal(){ if (SEL == null || !A || A.readOnly) return; const m = notes(A.id)[SEL]; const id = idCounter++; let text = ''; const title = `Saved from ${A.n.split(' ')[0]}`; if (m.k === 'text') text = m.x; else if (m.k === 'song') text = `Song: ${m.title} by ${m.artist}`; else if (m.k === 'img') text = `[Photo saved in chat] ${m.x||''}`; else if (m.k === 'vid') text = `[Video saved in chat] ${m.name||''}`; else if (m.k === 'file') text = `[File saved in chat] ${m.name||''}`; else if (m.k === 'note') return toast('Already a note'); DB.journal.push({ id, title, text, mood: COLORS[3].v, t: Date.now(), createdAt: Date.now(), editedAt: Date.now(), pinned: false }); save(); hideRx(); haptic('success'); toast('Saved to Journal'); }
+
+/* ------------------------------ ATTACHMENTS ------------------------------ */
+function attach(kind){ closeSheet(); if (kind === 'photo') $('fPhoto').click(); if (kind === 'camera') $('fCam').click(); if (kind === 'video') $('fVid').click(); if (kind === 'file') $('fAny').click(); if (kind === 'music') setTimeout(() => sheet('pickSong'), 180); if (kind === 'note') setTimeout(() => sheet('pickNote'), 180); }
+function compressImg(file, cb){ const r = new FileReader(); r.onload = ev => { const im = new Image(); im.onload = () => { let w = im.width, h = im.height; const s = Math.min(1, 880 / Math.max(w, h)); w = Math.round(w * s); h = Math.round(h * s); const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h); cb(c.toDataURL('image/jpeg', .72)); }; im.src = ev.target.result; }; r.readAsDataURL(file); }
+$('fPhoto').onchange = function(){ const f = this.files && this.files[0]; this.value = ''; if (!f || !A || A.readOnly) return; compressImg(f, src => { pushMsg({ s:'m', k:'img', src, x: $('inp').value.trim(), t: Date.now() }); $('inp').value = ''; tog(); }); };
+$('fCam').onchange = $('fPhoto').onchange;
+$('fVid').onchange = function(){ const f = this.files && this.files[0]; this.value = ''; if (!f || !A || A.readOnly) return; const sid = 'v' + Date.now(); sessionBlobs[sid] = URL.createObjectURL(f); pushMsg({ s:'m', k:'vid', name: f.name, size: bytes(f.size), sid, t: Date.now() }); };
+$('fAny').onchange = function(){ const f = this.files && this.files[0]; this.value = ''; if (!f || !A || A.readOnly) return; pushMsg({ s:'m', k:'file', name: f.name, size: bytes(f.size), t: Date.now() }); };
+function sendSongFromSheet(id){ closeSheet(); if (!A || A.readOnly) return; const s = DB.music.find(x => x.id === id); if (s) pushMsg({ s:'m', k:'song', title: s.t, artist: s.a, c: s.c, songId: s.id, t: Date.now() }); }
+function sendNote(id){ closeSheet(); if (!A || A.readOnly) return; const e = DB.journal.find(x => x.id === id); if (!e) return; pushMsg({ s:'m', k:'note', title: e.title || 'Untitled', text: (e.text||'').slice(0,140), mood: e.mood, noteId: e.id, t: Date.now() }); }
+
+/* ------------------------------ JOURNAL LIBRARY ------------------------------ */
+function cardHTML(e, pos){ const words = (e.text||'').trim().split(/\s+/).filter(Boolean).length; const mood = e.mood || '#FFD93D'; const arrow = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--paper)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>`; const pinIcon = e.pinned ? `<svg class="jPin" viewBox="0 0 24 24" fill="currentColor"><path d="M16 3H8v2h2v7l-2 3v2h3v4l1 1 1-1v-4h3v-2l-2-3V5h2V3z"/></svg>` : ''; return `<div class="jCard" data-id="${e.id}" ${pos !== undefined ? `data-o="${pos}"` : ''} style="--cbg:${soften(mood,.62)};--ctab:${soften(mood,.15)}"><div class="jTopRow"><span class="jDot"></span><span class="jMeta">${dayL(e.createdAt||e.t)}</span>${pinIcon}<span class="jShare" onclick="openJournalOpts(${e.id},event)">⋯</span></div><div class="jt">${esc(e.title||'Untitled')}</div><div class="jp">${esc((e.text||'').slice(0,70)) || 'Nothing written yet — tap to begin.'}</div><div class="jFoot"><span class="jTag">${words ? words + ' word' + (words===1?'':'s') : 'Empty draft'}</span><span class="jArrow">${arrow}</span></div></div>`; }
+function renderJournal(){ $('jToday').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}); $('jAv').style.background = DB.me.color; $('jAv').textContent = ini(DB.me.name); jEntries = (DB.journal||[]).slice().sort((a,b) => (b.pinned?1:0)-(a.pinned?1:0) || (b.createdAt||b.t)-(a.createdAt||a.t)); const n = jEntries.length; $('jCount').textContent = n ? `${n} ${n===1?'entry':'entries'} · pinned first` : 'Nothing written yet'; $('jAllBtn').style.display = n > 3 ? '' : 'none'; const list = $('jList'); if (!n) { list.innerHTML = `<div class="emptyCircle"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><h5>Your journal is empty</h5><p>Write your first private thought.</p></div>`; return; } if (n <= 3) { list.innerHTML = `<div class="jFlow">${jEntries.map(e => cardHTML(e)).join('')}</div>`; list.querySelectorAll('.jCard').forEach((c, i) => { c.style.animationDelay = (i * 70) + 'ms'; c.onclick = ev => { if (ev.target.closest('.jShare')) return; haptic('selection'); openEntry(+c.dataset.id); }; }); return; } if (jIdx > n-1) jIdx = 0; list.innerHTML = `<div class="jHint"><span>SWIPE TO BROWSE</span><span class="bar"></span><div class="jNav"><button onclick="stepCard(-1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg></button><b id="jPos"></b><button onclick="stepCard(1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div><div class="jStack" id="jStack">${jEntries.map(e => cardHTML(e, 9)).join('')}</div>`; layoutStack(); initStackDrag($('jStack')); }
+function layoutStack(){ const st = $('jStack'); if (!st) return; const cards = [...st.children], n = cards.length; cards.forEach((c, i) => { let o = i - jIdx; if (o < 0) o += n; c.classList.toggle('hid', o > 3); if (o > 3) { c.style.transform = 'translateY(46px) scale(.84)'; c.removeAttribute('data-o'); return; } c.dataset.o = o; const ty = [0,13,25,35][o], sc = [1,.96,.925,.89][o]; c.style.transform = `translateY(${ty}px) scale(${sc})`; }); const pos = $('jPos'); if (pos) pos.textContent = `${jIdx + 1} / ${n}`; }
+function stepCard(d){ const n = jEntries.length; if (n < 2) return; jIdx = (jIdx + d + n) % n; layoutStack(); haptic('selection'); }
+function initStackDrag(el){ if (!el) return; let sy = 0, dy = 0, drag = false; el.onpointerdown = ev => { if (!ev.target.closest('.jCard')) return; drag = true; sy = ev.clientY; dy = 0; try { el.setPointerCapture(ev.pointerId); } catch(e){} }; el.onpointermove = ev => { if (!drag) return; dy = ev.clientY - sy; const f = el.querySelector('[data-o="0"]'); if (f && Math.abs(dy) > 4) { f.style.transition = 'none'; f.style.transform = `translateY(${dy*.55}px) rotate(${dy*.012}deg) scale(${1-Math.min(Math.abs(dy),80)/900})`; } }; el.onpointerup = ev => { if (!drag) return; drag = false; const f = el.querySelector('[data-o="0"]'); if (f) f.style.transition = ''; if (Math.abs(dy) < 7) { if (ev.target.closest('.jShare')) { layoutStack(); return; } const card = ev.target.closest('.jCard'); if (card && card.dataset.o === '0') { haptic('selection'); openEntry(+card.dataset.id); return; } if (card && card.dataset.o) { jIdx = (jIdx + +card.dataset.o) % jEntries.length; haptic('selection'); } layoutStack(); return; } if (dy < -44) stepCard(1); else if (dy > 44) stepCard(-1); else layoutStack(); dy = 0; }; el.onpointercancel = () => { drag = false; layoutStack(); }; }
+function openJournalOpts(id, e){ if (e) e.stopPropagation(); curEntryId = id; sheet('optJournal'); }
+function togglePinNote(id){ const e = DB.journal.find(x => x.id === id); if (e) e.pinned = !e.pinned; save(); closeSheet(); renderJournal(); haptic('light'); }
+function duplicateNote(id){ const e = DB.journal.find(x => x.id === id); if (!e) return; const newId = idCounter++; DB.journal.push({ ...e, id: newId, title: e.title ? e.title + ' (Copy)' : '', createdAt: Date.now(), editedAt: Date.now(), pinned: false }); save(); closeSheet(); renderJournal(); toast('Duplicated'); haptic('success'); }
+function sendToCircle(id){ closeSheet(); if (!DB.circle.length) { toast('Add someone first'); return; } window._noteToSend = id; $('scr').classList.add('on'); $('sT').textContent = 'Send to…'; $('sB').innerHTML = DB.circle.map(p => `<div class="iceR" onclick="deliverNote(${p.id})"><div style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:${p.c};font-family:'Fraunces',serif">${ini(p.n)}</div><div class="t">${esc(p.n)}</div></div>`).join(''); }
+function deliverNote(pid){ const e = DB.journal.find(x => x.id === window._noteToSend); closeSheet(); if (!e) return; notes(pid).push({ s:'m', k:'note', title: e.title || 'Untitled', text: (e.text||'').slice(0,140), mood: e.mood, noteId: e.id, t: Date.now() }); save(); haptic('success'); toast(`Sent to ${findPerson(pid).n.split(' ')[0]}`); }
+function shareEntry(id){ const en = DB.journal.find(x => x.id === id); if (!en) return; shareText(en.title || 'Hichki note', `${en.title||'Untitled'}\n\n${en.text||''}`); closeSheet(); }
+window.saveNoteRename = () => { const val = $('rnInput').value.trim(); const e = DB.journal.find(x => x.id === curEntryId); if (e) { e.title = val; e.editedAt = Date.now(); save(); renderJournal(); } sheet('optJournal'); };
+function newEntry(){ const id = idCounter++; DB.journal = DB.journal || []; DB.journal.push({ id, title:'', text:'', mood: COLORS[3].v, t: Date.now(), createdAt: Date.now(), editedAt: Date.now(), pinned: false }); save(); haptic('light'); jIdx = 0; openEntry(id); }
+function openEntry(id){ curEntryId = id; const e = DB.journal.find(x => x.id === id); if (!e) return; go('je'); $('jeDate').textContent = new Date(e.createdAt || e.t).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}).toUpperCase(); $('jeTitle').value = e.title || ''; $('jeText').value = e.text || ''; updateWordCount(); const pick = $('jeMood'); pick.innerHTML = COLORS.map(c => `<div class="swatch ${c.v===e.mood?'on':''}" data-c="${c.v}" style="background:${c.v}"></div>`).join(''); pick.querySelectorAll('.swatch').forEach(sw => sw.onclick = () => { pick.querySelectorAll('.swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); e.mood = sw.dataset.c; e.editedAt = Date.now(); save(); haptic('selection'); }); setTimeout(() => $('jeTitle').focus(), 300); }
+function updateWordCount(){ const e = DB.journal.find(x => x.id === curEntryId); if (!e) return; const words = (e.text||'').trim().split(/\s+/).filter(Boolean).length; $('jeWords').textContent = words ? 'Saved · ' + words + ' word' + (words===1?'':'s') : 'Saved'; }
+function autoSaveEntry(){ const e = DB.journal.find(x => x.id === curEntryId); if (!e) return; e.title = $('jeTitle').value; e.text = $('jeText').value; e.editedAt = Date.now(); save(); updateWordCount(); }
+function closeEntry(){ autoSaveEntry(); const e = DB.journal.find(x => x.id === curEntryId); if (e && !(e.title||'').trim() && !(e.text||'').trim()) DB.journal = DB.journal.filter(x => x.id !== curEntryId); curEntryId = null; save(); go('j'); }
+function deleteEntry(){ hichkiConfirm('Delete this entry?', () => { DB.journal = DB.journal.filter(x => x.id !== curEntryId); curEntryId = null; save(); haptic('warning'); jIdx = 0; closeSheet(); go('j'); }); }
+
+/* ------------------------------ MUSIC SYSTEM ------------------------------ */
+function renderMusic(){ $('mToday').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}); $('mAv').style.background = DB.me.color; $('mAv').textContent = ini(DB.me.name); loadTrack(); updatePlayUI(); if ($('progFill')) $('progFill').style.width = progPct + '%'; if (!DB.music.length) { $('mList').innerHTML = `<div class="emptyCircle" style="margin-top:20px"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#141410" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><h5>Your library is empty</h5><p>Import audio or paste a link.</p></div>`; return; } $('mList').innerHTML = DB.music.map((s, i) => { const isCur = s.id === curTrackId; const fav = DB.favorites.includes(s.id); const heart = `<svg width="15" height="15" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.35-9.5-9A5.5 5.5 0 0112 5a5.5 5.5 0 019.5 7c-2.5 4.65-9.5 9-9.5 9z"/></svg>`; return `<div class="mRow ${isCur?'playing':''}" style="animation-delay:${i*30}ms" onclick="selectTrackById(${s.id})"><div class="mc ${isCur&&playing?'spin':''}" style="--sc:${s.c}"></div><div class="mi"><b>${esc(s.t)}</b><span>${esc(s.a)}</span></div>${isCur&&playing ? '<div class="mini"><i></i><i></i><i></i></div>' : `<div class="dur">${s.type==='link'?'Link':'Audio'}</div>`}<button class="fav ${fav?'on':''}" onclick="toggleFavById(${s.id},event)">${heart}</button><button class="sendBtn" onclick="optMusic(${s.id},event)">⋯</button></div>`; }).join(''); }
+function optMusic(id, e){ if (e) e.stopPropagation(); window._optMusicId = id; sheet('optMusic'); }
+function toggleFavById(id, e){ if (e) e.stopPropagation(); const idx = DB.favorites.indexOf(id); if (idx > -1) DB.favorites.splice(idx, 1); else DB.favorites.push(id); save(); haptic('light'); renderMusic(); }
+function selectTrackById(id){ if (playing && curTrackId === id && DB.music.find(m=>m.id===id)?.type !== 'link') { togglePlay(); return; } curTrackId = id; playing = false; progPct = 0; loadTrack(); renderMusic(); haptic('selection'); if (DB.music.find(m=>m.id===id)?.type === 'local') togglePlay(); }
+function sendSongFromMusicById(id){ if (!DB.circle.length) { toast('Add someone first'); return; } window._songToSend = id; $('scr').classList.add('on'); $('sT').textContent = 'Send this song to…'; $('sB').innerHTML = DB.circle.map(p => `<div class="iceR" onclick="deliverSong(${p.id})"><div style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;background:${p.c};font-family:'Fraunces',serif">${ini(p.n)}</div><div class="t">${esc(p.n)}</div></div>`).join(''); }
+function shareMusicById(id){ const s = DB.music.find(x => x.id === id); if (!s) return; shareText(s.t, `🎵 ${s.t} — ${s.a}\n${s.url ? s.url : 'Listening on Hichki.'}`); }
+function removeMusicById(id){ hichkiConfirm('Remove this track from library?', () => { DB.music = DB.music.filter(x => x.id !== id); if (curTrackId === id) { audioEl.pause(); audioEl.src = ''; curTrackId = null; playing = false; progPct = 0; if ($('progFill')) $('progFill').style.width = '0%'; $('pTimeCur').textContent = '0:00'; $('pTimeTot').textContent = '0:00'; } save(); renderMusic(); toast('Removed'); }); }
+function deliverSong(pid){ const s = DB.music.find(m => m.id === window._songToSend); closeSheet(); if (s) { notes(pid).push({ s:'m', k:'song', title: s.t, artist: s.a, c: s.c, songId: s.id, t: Date.now() }); save(); haptic('success'); toast(`Sent to ${findPerson(pid).n.split(' ')[0]}`); } }
+$('fAudio').onchange = function(){ const files = Array.from(this.files); this.value = ''; if (!files.length) return; files.forEach(f => { const sid = 'a' + Date.now() + Math.floor(Math.random() * 1000); sessionBlobs[sid] = URL.createObjectURL(f); const existing = DB.music.find(m => m.type === 'local' && m.filename === f.name && m.size === f.size); if (existing) existing.sid = sid; else DB.music.unshift({ id: idCounter++, t: f.name.replace(/\.[^/.]+$/, ""), a: 'Local File', filename: f.name, size: f.size, c: COLORS[Math.floor(Math.random()*COLORS.length)].v, sid, type: 'local', addedAt: Date.now() }); }); save(); toast(`Imported ${files.length} track(s)`); if (!curTrackId && DB.music.length) selectTrackById(DB.music[0].id); else renderMusic(); };
+window.saveMusicLink = () => { const url = $('mlUrl').value.trim(); const title = $('mlTitle').value.trim() || 'Saved Link'; const artist = $('mlArtist').value.trim(); if (!url) return toast('Link required'); let source = 'Web Link'; if (url.includes('spotify.com')) source = 'Spotify'; else if (url.includes('youtube.com') || url.includes('youtu.be')) source = 'YouTube'; else if (url.includes('apple.com')) source = 'Apple Music'; else if (url.includes('soundcloud.com')) source = 'SoundCloud'; else if (url.includes('jiosaavn.com')) source = 'JioSaavn'; DB.music.unshift({ id: idCounter++, t: title, a: artist || source, source, c: COLORS[Math.floor(Math.random()*COLORS.length)].v, type: 'link', url, addedAt: Date.now() }); save(); closeSheet(); toast('Added link'); if (!curTrackId && DB.music.length) selectTrackById(DB.music[0].id); else renderMusic(); };
+window.saveMusicRename = () => { const s = DB.music.find(x => x.id === window._optMusicId); if (s) { s.t = $('rmTitle').value.trim() || 'Untitled'; s.a = $('rmArtist').value.trim() || 'Unknown'; save(); renderMusic(); } sheet('optMusic'); };
+window.openMusicLink = id => { const t = DB.music.find(m => m.id === id); if (t && t.type === 'link' && isValidUrl(t.url)) { try { window.open(t.url, '_blank'); } catch(e) {} if (navigator.clipboard) { navigator.clipboard.writeText(t.url).then(()=>toast('Link copied — open in app')); } else toast('Link copied'); } else toast('Invalid link'); };
+function loadTrack(){ const s = DB.music.find(m => m.id === curTrackId); if (!s) { $('pTitle').textContent = 'Select a track'; $('pArtist').textContent = 'to play'; $('progWrap').style.display = 'none'; $('transport').style.display = 'flex'; $('linkAction').style.display = 'none'; return; } $('pTitle').textContent = s.t; $('albumArt').style.setProperty('--sc', s.c); if (s.type === 'link') { $('pArtist').textContent = s.a; $('progWrap').style.display = 'none'; $('transport').style.display = 'none'; $('linkAction').style.display = 'flex'; $('linkActionBtn').textContent = 'Open in ' + (s.source || 'App'); $('linkActionBtn').onclick = () => openMusicLink(s.id); } else { $('progWrap').style.display = 'flex'; $('transport').style.display = 'flex'; $('linkAction').style.display = 'none'; if (!s.sid || !sessionBlobs[s.sid]) $('pArtist').textContent = '⚠️ Re-import to play (session ended)'; else $('pArtist').textContent = s.a; } }
+function togglePlay(){ if (!DB.music.length) return; const track = DB.music.find(m => m.id === curTrackId); if (!track) return toast('Select a track'); if (track.type === 'link') { openMusicLink(track.id); return; } if (track.type === 'local') { if (!track.sid || !sessionBlobs[track.sid]) { toast('Re-import to play (session ended)'); playing = false; updatePlayUI(); return; } if (playing) { audioEl.pause(); playing = false; } else { if (audioEl.src !== sessionBlobs[track.sid]) audioEl.src = sessionBlobs[track.sid]; audioEl.play().then(() => { playing = true; updatePlayUI(); renderMusic(); }).catch(() => { toast('Playback failed'); playing = false; updatePlayUI(); }); } } updatePlayUI(); }
+function seekAudio(e){ if (!audioEl.duration || (!playing && audioEl.paused && !audioEl.src)) return; const r = e.currentTarget.getBoundingClientRect(); const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); audioEl.currentTime = pct * audioEl.duration; progPct = pct * 100; if ($('progFill')) $('progFill').style.width = progPct + '%'; }
+const fmtTime = s => isNaN(s) ? '0:00' : Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+audioEl.ontimeupdate = () => { if (audioEl.duration) { progPct = (audioEl.currentTime / audioEl.duration) * 100; if ($('progFill')) $('progFill').style.width = progPct + '%'; $('pTimeCur').textContent = fmtTime(audioEl.currentTime); $('pTimeTot').textContent = fmtTime(audioEl.duration); } };
+audioEl.onloadedmetadata = () => { $('pTimeTot').textContent = fmtTime(audioEl.duration); };
+audioEl.onended = () => { nextTrack(); };
+function cycleTrack(dir){ if (!DB.music.length) return; const locals = DB.music.filter(m => m.type === 'local'); if (!locals.length) { toast('No playable local tracks'); return; } let idx = locals.findIndex(m => m.id === curTrackId); if (idx === -1) idx = 0; else idx = (idx + dir + locals.length) % locals.length; selectTrackById(locals[idx].id); }
+const nextTrack = () => cycleTrack(1); const prevTrack = () => cycleTrack(-1);
+function shareTrack(){ if (!curTrackId) return; shareMusicById(curTrackId); }
+function updatePlayUI(){ $('pWave').classList.toggle('paused', !playing); $('albumArt').classList.toggle('spin', playing); $('tonearm').classList.toggle('active', playing); $('playIcon').innerHTML = playing ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>'; }
+
+/* ------------------------------ SETTINGS ------------------------------ */
+function renderSettings(){ $('sAv').style.background = DB.me.color; $('sAv').textContent = ini(DB.me.name); $('sName').textContent = DB.me.name; const total = Object.values(DB.notes).flat().length; $('sMeta').textContent = `${total} note${total===1?'':'s'} · ${DB.circle.length} ${DB.circle.length===1?'person':'people'}`; $('tgSound').classList.toggle('on', DB.prefs.sound); $('tgQuiet').classList.toggle('on', DB.prefs.quiet); $('tgHaptics').classList.toggle('on', DB.prefs.haptics); }
+function toggle(p){ DB.prefs[p] = !DB.prefs[p]; save(); $('tg' + p[0].toUpperCase() + p.slice(1)).classList.toggle('on', DB.prefs[p]); if (p === 'sound' && DB.prefs.sound) playTone(720,.1); if (p === 'haptics' && DB.prefs.haptics) haptic('light'); toast(DB.prefs[p] ? 'On' : 'Off'); }
+function exportData(){ const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = `hichki-${new Date().toISOString().split('T')[0]}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); toast('Exported'); }
+$('fImport').onchange = function(){ const f = this.files && this.files[0]; this.value = ''; if (!f) return; const r = new FileReader(); r.onload = () => { try { const data = JSON.parse(r.result); if (!data?.me) throw 'Invalid backup'; mergeDB(data); save(); toast('Backup restored'); go('h'); } catch(e) { toast('Invalid backup file'); } }; r.readAsText(f); };
+function mergeDB(incoming){ const circleMap = new Map(DB.circle.map(p => [p.id, p])); incoming.circle.forEach(p => { const existing = circleMap.get(p.id); if (!existing || (p.addedAt || 0) > (existing.addedAt || 0)) circleMap.set(p.id, p); }); DB.circle = [...circleMap.values()]; Object.keys(incoming.notes || {}).forEach(pid => { const local = notes(pid); const remote = incoming.notes[pid]; const merged = [...local, ...remote].sort((a,b) => a.t - b.t); const seen = new Set(); DB.notes[pid] = merged.filter(m => { const key = m.t + '|' + (m.x || m.title || ''); if (seen.has(key)) return false; seen.add(key); return true; }); }); const journalMap = new Map(DB.journal.map(e => [e.id, e])); (incoming.journal || []).forEach(e => { const existing = journalMap.get(e.id); if (!existing || (e.editedAt || 0) > (existing.editedAt || 0)) journalMap.set(e.id, e); }); DB.journal = [...journalMap.values()]; const musicMap = new Map(DB.music.map(m => [m.id, m])); (incoming.music || []).forEach(m => { const existing = musicMap.get(m.id); if (!existing || (m.addedAt || 0) > (existing.addedAt || 0)) musicMap.set(m.id, m); }); DB.music = [...musicMap.values()]; DB.favorites = [...new Set([...DB.favorites, ...(incoming.favorites || [])])]; const sharedMap = new Map(Object.entries(DB.sharedThreads || {})); Object.entries(incoming.sharedThreads || {}).forEach(([pid, st]) => { const existing = sharedMap.get(pid); if (!existing || (st.importedAt || 0) > (existing.importedAt || 0)) sharedMap.set(pid, st); }); DB.sharedThreads = Object.fromEntries(sharedMap); idCounter = Math.max(idCounter, ...DB.circle.map(p => p.id), ...DB.journal.map(e => e.id), ...DB.music.map(m => m.id)) + 1; }
+function fullReset(){ hichkiConfirm('Delete everything? This can\'t be undone.', () => { audioEl.pause(); audioEl.src = ''; Object.values(sessionBlobs).forEach(URL.revokeObjectURL); localStorage.removeItem(KEY); DB = null; onbMe = { name:'', color:'#FFBC94' }; onbFP = { name:'', color:'#F7BBD8' }; 
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE LIVE SYNC — Clean, Non-blocking, Safe
+   ═══════════════════════════════════════════════════════════════ */
+
+const SUPABASE_URL = 'https://mzfwevtiydprksuwalpt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ME8_OdUUnXLhahBzdMKiIQ_o-I1WVDW';
+
+let sb = null, realtimeChannel = null, syncQueue = [];
+let sbReady = false;
+
+const deviceId = localStorage.getItem('hichki.deviceId') || ('dev_' + Math.random().toString(36).slice(2, 10));
+localStorage.setItem('hichki.deviceId', deviceId);
+
+function getRoomId(pid){ const p = findPerson(pid); return (p && p.syncCode) ? p.syncCode : null; }
+
+function updateSyncBadge(state){
+  const el = document.getElementById('syncBadge');
+  if(!el) return;
+  const colors = { offline:'var(--mut)', syncing:'var(--y)', synced:'var(--g)', error:'var(--coral)' };
+  el.style.background = colors[state] || colors.offline;
+  el.style.opacity = (state === 'synced' || state === 'syncing') ? '1' : '0';
+  el.title = { offline:'Offline', syncing:'Syncing…', synced:'Live', error:'Error' }[state] || state;
+}
+
+async function initSupabase(){
+  if(typeof supabase === 'undefined'){ console.warn('Supabase SDK not loaded'); return; }
+  if(false){ console.warn('Supabase keys not configured'); return; }
+  try{
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const {error} = await sb.from('messages').select('count').limit(1);
+    if(error && error.code !== 'PGRST116') throw error;
+    sbReady = true; console.log('✅ Supabase connected');
+    processQueue();
+  }catch(e){ console.error('Supabase init failed:', e.message); }
+}
+
+async function cloudSend(msg, pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady){ if(rid) syncQueue.push({msg,pid}); return; }
+  if(!navigator.onLine){ syncQueue.push({msg,pid}); updateSyncBadge('offline'); return; }
+  try{
+    await sb.from('messages').insert({
+      room_id: rid, sender_id: deviceId, sender_name: DB.me.name,
+      content: msg.x || msg.title || JSON.stringify(msg),
+      kind: msg.k || 'text',
+      meta: { color: DB.me.color, senderColor: msg.c, songId: msg.songId, noteId: msg.noteId, replyTo: msg.q, initials: ini(DB.me.name) }
+    });
+    updateSyncBadge('synced');
+  }catch(e){ console.error('Cloud send failed:', e.message); syncQueue.push({msg,pid}); updateSyncBadge('error'); }
+}
+
+async function processQueue(){
+  if(!navigator.onLine || !sb || !syncQueue.length) return;
+  updateSyncBadge('syncing');
+  const batch = syncQueue.splice(0);
+  for(const item of batch) await cloudSend(item.msg, item.pid);
+  if(!syncQueue.length) updateSyncBadge('synced');
+}
+
+function subscribeRoom(pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady) return;
+  if(realtimeChannel){ realtimeChannel.unsubscribe(); realtimeChannel = null; }
+  updateSyncBadge('syncing');
+  realtimeChannel = sb.channel('room:' + rid)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'room_id=eq.' + rid }, payload => {
+      const cm = payload.new;
+      if(cm.sender_id === deviceId) return;
+      const m = { s:'t', k: cm.kind||'text', x: cm.content, t: new Date(cm.created_at).getTime(), c: cm.meta?.senderColor, songId: cm.meta?.songId, noteId: cm.meta?.noteId, q: cm.meta?.replyTo };
+      const arr = notes(pid);
+      if(!arr.find(x => Math.abs(x.t - m.t) < 2000 && x.x === m.x)){
+        arr.push(m); save();
+        if(A && A.id === pid){ draw(); playTone(600,.08); haptic('light'); }
+      }
+    })
+    .subscribe(st => { if(st === 'SUBSCRIBED') updateSyncBadge('synced'); else if(st === 'CLOSED') updateSyncBadge('offline'); });
+}
+
+async function loadHistory(pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady || !navigator.onLine) return;
+  updateSyncBadge('syncing');
+  try{
+    const {data, error} = await sb.from('messages').select('*').eq('room_id', rid).order('created_at', {ascending:true}).limit(100);
+    if(error) throw error;
+    if(!data || !data.length) return;
+    let added = 0;
+    const arr = notes(pid);
+    data.forEach(cm => {
+      if(cm.sender_id === deviceId) return;
+      const m = { s:'t', k: cm.kind||'text', x: cm.content, t: new Date(cm.created_at).getTime(), c: cm.meta?.senderColor };
+      if(!arr.find(x => Math.abs(x.t - m.t) < 2000 && x.x === m.x)){ arr.push(m); added++; }
+    });
+    if(added){ arr.sort((a,b) => a.t - b.t); save(); if(A && A.id === pid) draw(); }
+    updateSyncBadge('synced');
+  }catch(e){ console.error('History load failed:', e.message); updateSyncBadge('error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SAFE OVERRIDES — Original behavior preserved, sync added
+   ═══════════════════════════════════════════════════════════════ */
+
+const _origPushMsg = pushMsg;
+pushMsg = function(msg){
+  if(A.readOnly) return;
+  if(REPLY) msg.q = REPLY.t;
+  notes(A.id).push(msg); cancelReply(); save(); draw();
+  playTone(880,.08); haptic('medium');
+  setTimeout(() => cloudSend(msg, A.id), 0);
+};
+
+const _origOpen = open_;
+open_ = function(id){
+  A = findPerson(id);
+  if(!A){ go('h'); return; }
+  const isRO = A.readOnly;
+  document.body.classList.toggle('readonlyThread', isRO);
+  go('c');
+  document.getElementById('who').innerHTML = '<span class="d" style="background:' + A.c + '"></span><span>' + esc(A.n) + '</span>';
+  document.getElementById('cn').innerHTML = 'A note to <em>' + esc(A.n.split(' ')[0]) + '</em>' + (isRO ? ' <span class="readonlyBadge" style="font-size:10px;margin-left:6px;vertical-align:middle">Read-only</span>' : '');
+  document.getElementById('cs').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}).toUpperCase();
+  tintChat(); draw(); updateSyncBadge('offline');
+  if(!isRO && A.syncCode){ loadHistory(id); subscribeRoom(id); }
+};
+
+const _origSavePerson = savePerson;
+savePerson = function(){
+  const n = document.getElementById('npName').value.trim();
+  const c = window._getNpColor ? window._getNpColor() : COLORS[0].v;
+  const syncCode = document.getElementById('npSync') ? document.getElementById('npSync').value.trim().toLowerCase().replace(/\s+/g, '-') : '';
+  if(!n){ toast('Name required'); return; }
+  const id = idCounter++;
+  DB.circle.push({ id, n, who: 'friend', c, addedAt: Date.now(), syncCode: syncCode || undefined });
+  save(); closeSheet(); home(); playTone(660,.1); haptic('success');
+  toast(n.split(' ')[0] + ' added' + (syncCode ? ' · live sync on' : ''));
+};
+
+const _origSheet = sheet;
+sheet = function(k, payload){
+  if(k === 'addPerson'){
+    document.getElementById('scr').classList.add('on');
+    document.getElementById('sT').textContent = 'Add someone';
+    document.getElementById('sB').innerHTML =
+      '<div class="field"><label>Their name</label><input id="npName" placeholder="e.g. Sara" maxlength="24"/></div>' +
+      '<div class="field"><label>Their colour</label><div class="colorPicker" id="npColors">' +
+      COLORS.map((c,i) => '<div class="swatch ' + (i===0?'on':'') + '" style="background:' + c.v + '" data-c="' + c.v + '"></div>').join('') +
+      '</div></div>' +
+      '<div class="field"><label>Sync Code <small style="color:var(--mut);font-weight:500">(same on both phones)</small></label><input id="npSync" placeholder="e.g. sara-rahul-2024" style="text-transform:lowercase"/></div>' +
+      '<p class="sub" style="margin:6px 0 14px;font-size:11px">Both people must enter the exact same code. Leave blank for local-only chat.</p>' +
+      '<button class="cta slim" style="margin-top:4px" onclick="savePerson()">Add to circle</button>';
+    let np = COLORS[0].v;
+    document.querySelectorAll('#npColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#npColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); np = sw.dataset.c; haptic('selection'); });
+    window._getNpColor = () => np;
+    setTimeout(() => document.getElementById('npName').focus(), 300);
+    return;
+  }
+  _origSheet(k, payload);
+};
+
+const _origHome = home;
+home = function(){
+  _origHome();
+  document.querySelectorAll('.pcard').forEach(card => {
+    const onclick = card.getAttribute('onclick');
+    if(!onclick || !onclick.includes('open_')) return;
+    const idMatch = onclick.match(/open_\((\d+)\)/);
+    if(!idMatch) return;
+    const pid = +idMatch[1];
+    const p = findPerson(pid);
+    const avatar = card.querySelector('.a');
+    if(p && p.syncCode && avatar && !avatar.querySelector('.liveDot')){
+      avatar.style.position = 'relative';
+      avatar.innerHTML += '<span class="liveDot" style="position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--g);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>';
+    }
+  });
+};
+
+const _origOpenProfile = openProfile;
+openProfile = function(){
+  if(!A) return;
+  haptic('selection'); document.getElementById('scr').classList.add('on'); document.getElementById('sT').textContent = 'Profile';
+  const msgCount = notes(A.id).length;
+  const since = A.addedAt ? new Date(A.addedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'a while ago';
+  const isRO = A.readOnly;
+  const hasSync = !!A.syncCode;
+  const syncBadge = hasSync
+    ? '<div style="background:var(--g);color:#141410;padding:5px 12px;border-radius:100px;font-size:10px;font-weight:800;display:inline-block;margin-top:10px">🟢 Live Sync · ' + esc(A.syncCode) + '</div>'
+    : '<div style="background:var(--paperDark);color:var(--mut);padding:5px 12px;border-radius:100px;font-size:10px;font-weight:800;display:inline-block;margin-top:10px">⚪ Local Only</div>';
+  document.getElementById('sB').innerHTML =
+    '<div style="text-align:center;margin-bottom:16px"><div class="avme" id="profAv" style="width:84px;height:84px;font-size:26px;margin:0 auto 10px;background:' + A.c + '">' + ini(A.n) + '</div><div class="colorPicker" id="profColors" style="justify-content:center"></div>' + syncBadge + '</div>' +
+    '<div class="field"><label>Name</label><input id="profName" value="' + esc(A.n) + '" maxlength="24" ' + (isRO?'readonly':'') + '/></div>' +
+    (!isRO ? '<div class="field"><label>Sync Code</label><input id="profSync" value="' + esc(A.syncCode || '') + '" placeholder="e.g. sara-rahul-2024" style="text-transform:lowercase"/></div>' : '') +
+    '<div style="display:flex;gap:10px;margin:14px 0 4px"><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:22px;font-weight:700">' + msgCount + '</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">notes total</div></div><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:13px;font-weight:700">' + since + '</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">in your circle since</div></div></div>' +
+    (!isRO ? '<button class="cta secondary" style="color:var(--coral);margin-top:12px" onclick="closeSheet();removePerson(' + A.id + ')">Remove from circle</button>' : '<div class="readonlyBadge" style="margin:12px auto 0;max-width:200px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V7c0-2.76-2.24-5-5-5S7 4.24 7 7v1H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg> Read-only shared thread</div>');
+  if(!isRO){
+    document.getElementById('profColors').innerHTML = COLORS.map(c => '<div class="swatch ' + (c.v===A.c?'on':'') + '" data-c="' + c.v + '" style="background:' + c.v + '"></div>').join('');
+    document.querySelectorAll('#profColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#profColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); A.c = sw.dataset.c; document.getElementById('profAv').style.background = A.c; save(); haptic('selection'); tintChat(); draw(); });
+  }
+  document.getElementById('profName').oninput = () => { if(!isRO) A.n = document.getElementById('profName').value.trim() || A.n; };
+  document.getElementById('profName').onblur = () => { if(!isRO){ save(); document.getElementById('who').innerHTML = '<span class="d" style="background:' + A.c + '"></span><span>' + esc(A.n) + '</span>'; document.getElementById('cn').innerHTML = 'A note to <em>' + esc(A.n.split(' ')[0]) + '</em>'; } };
+  if(!isRO && document.getElementById('profSync')){
+    document.getElementById('profSync').oninput = () => { A.syncCode = document.getElementById('profSync').value.trim().toLowerCase().replace(/\s+/g, '-'); save(); };
+    document.getElementById('profSync').onblur = () => { if(A.syncCode){ subscribeRoom(A.id); loadHistory(A.id); toast('Sync code updated'); } };
+  }
+};
+
+// Init Supabase after everything loads (non-blocking)
+setTimeout(initSupabase, 1500);
+
+boot(); }); }
+
+/* ------------------------------ KEYBOARD & BOOT ------------------------------ */
+document.addEventListener('keydown', e => { if (e.target.matches('input, textarea, [contenteditable]')) return; if (e.key === 'Escape') { if ($('scr').classList.contains('on')) closeSheet(); else if ($('rb').classList.contains('on')) hideRx(); else if (REPLY) cancelReply(); else if ($('qrScanner').style.display === 'flex') closeQrScanner(); } if ($('j').classList.contains('on') && jEntries.length > 3) { if (e.key === 'ArrowDown') stepCard(1); if (e.key === 'ArrowUp') stepCard(-1); } });
+
+/* ------------------------------ PWA REGISTRATION ------------------------------ */
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { const swCode = `const CACHE = 'hichki-v7'; const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png']; self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)))); self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));`; const blob = new Blob([swCode], { type: 'application/javascript' }); const swUrl = URL.createObjectURL(blob); navigator.serviceWorker.register(swUrl).catch(()=>{}); URL.revokeObjectURL(swUrl); }); }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE LIVE SYNC — Clean, Non-blocking, Safe
+   ═══════════════════════════════════════════════════════════════ */
+
+const SUPABASE_URL = 'https://mzfwevtiydprksuwalpt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ME8_OdUUnXLhahBzdMKiIQ_o-I1WVDW';
+
+let sb = null, realtimeChannel = null, syncQueue = [];
+let sbReady = false;
+
+const deviceId = localStorage.getItem('hichki.deviceId') || ('dev_' + Math.random().toString(36).slice(2, 10));
+localStorage.setItem('hichki.deviceId', deviceId);
+
+function getRoomId(pid){ const p = findPerson(pid); return (p && p.syncCode) ? p.syncCode : null; }
+
+function updateSyncBadge(state){
+  const el = document.getElementById('syncBadge');
+  if(!el) return;
+  const colors = { offline:'var(--mut)', syncing:'var(--y)', synced:'var(--g)', error:'var(--coral)' };
+  el.style.background = colors[state] || colors.offline;
+  el.style.opacity = (state === 'synced' || state === 'syncing') ? '1' : '0';
+  el.title = { offline:'Offline', syncing:'Syncing…', synced:'Live', error:'Error' }[state] || state;
+}
+
+async function initSupabase(){
+  if(typeof supabase === 'undefined'){ console.warn('Supabase SDK not loaded'); return; }
+  if(false){ console.warn('Supabase keys not configured'); return; }
+  try{
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const {error} = await sb.from('messages').select('count').limit(1);
+    if(error && error.code !== 'PGRST116') throw error;
+    sbReady = true; console.log('✅ Supabase connected');
+    processQueue();
+  }catch(e){ console.error('Supabase init failed:', e.message); }
+}
+
+async function cloudSend(msg, pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady){ if(rid) syncQueue.push({msg,pid}); return; }
+  if(!navigator.onLine){ syncQueue.push({msg,pid}); updateSyncBadge('offline'); return; }
+  try{
+    await sb.from('messages').insert({
+      room_id: rid, sender_id: deviceId, sender_name: DB.me.name,
+      content: msg.x || msg.title || JSON.stringify(msg),
+      kind: msg.k || 'text',
+      meta: { color: DB.me.color, senderColor: msg.c, songId: msg.songId, noteId: msg.noteId, replyTo: msg.q, initials: ini(DB.me.name) }
+    });
+    updateSyncBadge('synced');
+  }catch(e){ console.error('Cloud send failed:', e.message); syncQueue.push({msg,pid}); updateSyncBadge('error'); }
+}
+
+async function processQueue(){
+  if(!navigator.onLine || !sb || !syncQueue.length) return;
+  updateSyncBadge('syncing');
+  const batch = syncQueue.splice(0);
+  for(const item of batch) await cloudSend(item.msg, item.pid);
+  if(!syncQueue.length) updateSyncBadge('synced');
+}
+
+function subscribeRoom(pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady) return;
+  if(realtimeChannel){ realtimeChannel.unsubscribe(); realtimeChannel = null; }
+  updateSyncBadge('syncing');
+  realtimeChannel = sb.channel('room:' + rid)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'room_id=eq.' + rid }, payload => {
+      const cm = payload.new;
+      if(cm.sender_id === deviceId) return;
+      const m = { s:'t', k: cm.kind||'text', x: cm.content, t: new Date(cm.created_at).getTime(), c: cm.meta?.senderColor, songId: cm.meta?.songId, noteId: cm.meta?.noteId, q: cm.meta?.replyTo };
+      const arr = notes(pid);
+      if(!arr.find(x => Math.abs(x.t - m.t) < 2000 && x.x === m.x)){
+        arr.push(m); save();
+        if(A && A.id === pid){ draw(); playTone(600,.08); haptic('light'); }
+      }
+    })
+    .subscribe(st => { if(st === 'SUBSCRIBED') updateSyncBadge('synced'); else if(st === 'CLOSED') updateSyncBadge('offline'); });
+}
+
+async function loadHistory(pid){
+  const rid = getRoomId(pid);
+  if(!rid || !sb || !sbReady || !navigator.onLine) return;
+  updateSyncBadge('syncing');
+  try{
+    const {data, error} = await sb.from('messages').select('*').eq('room_id', rid).order('created_at', {ascending:true}).limit(100);
+    if(error) throw error;
+    if(!data || !data.length) return;
+    let added = 0;
+    const arr = notes(pid);
+    data.forEach(cm => {
+      if(cm.sender_id === deviceId) return;
+      const m = { s:'t', k: cm.kind||'text', x: cm.content, t: new Date(cm.created_at).getTime(), c: cm.meta?.senderColor };
+      if(!arr.find(x => Math.abs(x.t - m.t) < 2000 && x.x === m.x)){ arr.push(m); added++; }
+    });
+    if(added){ arr.sort((a,b) => a.t - b.t); save(); if(A && A.id === pid) draw(); }
+    updateSyncBadge('synced');
+  }catch(e){ console.error('History load failed:', e.message); updateSyncBadge('error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SAFE OVERRIDES — Original behavior preserved, sync added
+   ═══════════════════════════════════════════════════════════════ */
+
+const _origPushMsg = pushMsg;
+pushMsg = function(msg){
+  if(A.readOnly) return;
+  if(REPLY) msg.q = REPLY.t;
+  notes(A.id).push(msg); cancelReply(); save(); draw();
+  playTone(880,.08); haptic('medium');
+  setTimeout(() => cloudSend(msg, A.id), 0);
+};
+
+const _origOpen = open_;
+open_ = function(id){
+  A = findPerson(id);
+  if(!A){ go('h'); return; }
+  const isRO = A.readOnly;
+  document.body.classList.toggle('readonlyThread', isRO);
+  go('c');
+  document.getElementById('who').innerHTML = '<span class="d" style="background:' + A.c + '"></span><span>' + esc(A.n) + '</span>';
+  document.getElementById('cn').innerHTML = 'A note to <em>' + esc(A.n.split(' ')[0]) + '</em>' + (isRO ? ' <span class="readonlyBadge" style="font-size:10px;margin-left:6px;vertical-align:middle">Read-only</span>' : '');
+  document.getElementById('cs').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}).toUpperCase();
+  tintChat(); draw(); updateSyncBadge('offline');
+  if(!isRO && A.syncCode){ loadHistory(id); subscribeRoom(id); }
+};
+
+const _origSavePerson = savePerson;
+savePerson = function(){
+  const n = document.getElementById('npName').value.trim();
+  const c = window._getNpColor ? window._getNpColor() : COLORS[0].v;
+  const syncCode = document.getElementById('npSync') ? document.getElementById('npSync').value.trim().toLowerCase().replace(/\s+/g, '-') : '';
+  if(!n){ toast('Name required'); return; }
+  const id = idCounter++;
+  DB.circle.push({ id, n, who: 'friend', c, addedAt: Date.now(), syncCode: syncCode || undefined });
+  save(); closeSheet(); home(); playTone(660,.1); haptic('success');
+  toast(n.split(' ')[0] + ' added' + (syncCode ? ' · live sync on' : ''));
+};
+
+const _origSheet = sheet;
+sheet = function(k, payload){
+  if(k === 'addPerson'){
+    document.getElementById('scr').classList.add('on');
+    document.getElementById('sT').textContent = 'Add someone';
+    document.getElementById('sB').innerHTML =
+      '<div class="field"><label>Their name</label><input id="npName" placeholder="e.g. Sara" maxlength="24"/></div>' +
+      '<div class="field"><label>Their colour</label><div class="colorPicker" id="npColors">' +
+      COLORS.map((c,i) => '<div class="swatch ' + (i===0?'on':'') + '" style="background:' + c.v + '" data-c="' + c.v + '"></div>').join('') +
+      '</div></div>' +
+      '<div class="field"><label>Sync Code <small style="color:var(--mut);font-weight:500">(same on both phones)</small></label><input id="npSync" placeholder="e.g. sara-rahul-2024" style="text-transform:lowercase"/></div>' +
+      '<p class="sub" style="margin:6px 0 14px;font-size:11px">Both people must enter the exact same code. Leave blank for local-only chat.</p>' +
+      '<button class="cta slim" style="margin-top:4px" onclick="savePerson()">Add to circle</button>';
+    let np = COLORS[0].v;
+    document.querySelectorAll('#npColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#npColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); np = sw.dataset.c; haptic('selection'); });
+    window._getNpColor = () => np;
+    setTimeout(() => document.getElementById('npName').focus(), 300);
+    return;
+  }
+  _origSheet(k, payload);
+};
+
+const _origHome = home;
+home = function(){
+  _origHome();
+  document.querySelectorAll('.pcard').forEach(card => {
+    const onclick = card.getAttribute('onclick');
+    if(!onclick || !onclick.includes('open_')) return;
+    const idMatch = onclick.match(/open_\((\d+)\)/);
+    if(!idMatch) return;
+    const pid = +idMatch[1];
+    const p = findPerson(pid);
+    const avatar = card.querySelector('.a');
+    if(p && p.syncCode && avatar && !avatar.querySelector('.liveDot')){
+      avatar.style.position = 'relative';
+      avatar.innerHTML += '<span class="liveDot" style="position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--g);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>';
+    }
+  });
+};
+
+const _origOpenProfile = openProfile;
+openProfile = function(){
+  if(!A) return;
+  haptic('selection'); document.getElementById('scr').classList.add('on'); document.getElementById('sT').textContent = 'Profile';
+  const msgCount = notes(A.id).length;
+  const since = A.addedAt ? new Date(A.addedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'a while ago';
+  const isRO = A.readOnly;
+  const hasSync = !!A.syncCode;
+  const syncBadge = hasSync
+    ? '<div style="background:var(--g);color:#141410;padding:5px 12px;border-radius:100px;font-size:10px;font-weight:800;display:inline-block;margin-top:10px">🟢 Live Sync · ' + esc(A.syncCode) + '</div>'
+    : '<div style="background:var(--paperDark);color:var(--mut);padding:5px 12px;border-radius:100px;font-size:10px;font-weight:800;display:inline-block;margin-top:10px">⚪ Local Only</div>';
+  document.getElementById('sB').innerHTML =
+    '<div style="text-align:center;margin-bottom:16px"><div class="avme" id="profAv" style="width:84px;height:84px;font-size:26px;margin:0 auto 10px;background:' + A.c + '">' + ini(A.n) + '</div><div class="colorPicker" id="profColors" style="justify-content:center"></div>' + syncBadge + '</div>' +
+    '<div class="field"><label>Name</label><input id="profName" value="' + esc(A.n) + '" maxlength="24" ' + (isRO?'readonly':'') + '/></div>' +
+    (!isRO ? '<div class="field"><label>Sync Code</label><input id="profSync" value="' + esc(A.syncCode || '') + '" placeholder="e.g. sara-rahul-2024" style="text-transform:lowercase"/></div>' : '') +
+    '<div style="display:flex;gap:10px;margin:14px 0 4px"><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:22px;font-weight:700">' + msgCount + '</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">notes total</div></div><div style="flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--sh)"><div class="serif" style="font-size:13px;font-weight:700">' + since + '</div><div style="font-size:10.5px;color:var(--mut);font-weight:600;margin-top:2px">in your circle since</div></div></div>' +
+    (!isRO ? '<button class="cta secondary" style="color:var(--coral);margin-top:12px" onclick="closeSheet();removePerson(' + A.id + ')">Remove from circle</button>' : '<div class="readonlyBadge" style="margin:12px auto 0;max-width:200px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V7c0-2.76-2.24-5-5-5S7 4.24 7 7v1H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg> Read-only shared thread</div>');
+  if(!isRO){
+    document.getElementById('profColors').innerHTML = COLORS.map(c => '<div class="swatch ' + (c.v===A.c?'on':'') + '" data-c="' + c.v + '" style="background:' + c.v + '"></div>').join('');
+    document.querySelectorAll('#profColors .swatch').forEach(sw => sw.onclick = () => { document.querySelectorAll('#profColors .swatch').forEach(s => s.classList.remove('on')); sw.classList.add('on'); A.c = sw.dataset.c; document.getElementById('profAv').style.background = A.c; save(); haptic('selection'); tintChat(); draw(); });
+  }
+  document.getElementById('profName').oninput = () => { if(!isRO) A.n = document.getElementById('profName').value.trim() || A.n; };
+  document.getElementById('profName').onblur = () => { if(!isRO){ save(); document.getElementById('who').innerHTML = '<span class="d" style="background:' + A.c + '"></span><span>' + esc(A.n) + '</span>'; document.getElementById('cn').innerHTML = 'A note to <em>' + esc(A.n.split(' ')[0]) + '</em>'; } };
+  if(!isRO && document.getElementById('profSync')){
+    document.getElementById('profSync').oninput = () => { A.syncCode = document.getElementById('profSync').value.trim().toLowerCase().replace(/\s+/g, '-'); save(); };
+    document.getElementById('profSync').onblur = () => { if(A.syncCode){ subscribeRoom(A.id); loadHistory(A.id); toast('Sync code updated'); } };
+  }
+};
+
+// Init Supabase after everything loads (non-blocking)
+setTimeout(initSupabase, 1500);
+
+boot();
+</script>
+</body>
+</html>
