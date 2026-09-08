@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: hichki-realtime
+    runtime: docker
+    plan: free
+    rootDir: realtime-server
+    dockerfilePath: ./realtime-server/Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      - key: SUPABASE_URL
+        value: https://mzfwevtiydprksuwalpt.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://hichki.netlify.app

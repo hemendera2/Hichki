@@ -1,29 +1,36 @@
 # Hichki Security Status
 
-## Verified findings — 2026-09-08
+_Last verified: 2026-09-08_
 
-The connected Supabase project `mzfwevtiydprksuwalpt` was restored and inspected directly.
+## Database and API
 
-### Chat authorization
+The connected Supabase project `mzfwevtiydprksuwalpt` is `ACTIVE_HEALTHY`.
 
-`chat_messages` remains membership-scoped by RLS. The new Socket.IO service is relay-only: it authenticates the Supabase access token, checks conversation membership, and re-reads a persisted canonical message/receipt under the caller JWT before broadcasting. It does not create a second unauthorised message-write path.
+`chat_messages` remains conversation-membership scoped by RLS. `public.library_items` has RLS enabled, no anonymous table privileges, authenticated CRUD only, and explicit owner policies using `owner_id = auth.uid()`.
 
-### Notes/Music library
+The live Notes/Music migration is recorded as `20260908073027_hichki_library_and_message_kinds_v1`, and the Git source now carries that exact version. The previously missing historical migration `20260811080242_hichki_chat_anon_privilege_hardening_v1` was recovered exactly from live migration history.
 
-`public.library_items` was created with RLS enabled. `anon` has no table privileges; `authenticated` receives only SELECT/INSERT/UPDATE/DELETE and each operation is restricted to `owner_id = auth.uid()`. The structural security regression guard passed after the live migration.
+Post-migration structural security guard: PASS. Supabase Security Advisor: 0 lints.
 
-### Legacy surfaces
+## Socket.IO authorization
 
-The retired `public.messages` surface remains covered by lockdown migrations/regression guards. The previously missing live migration version `20260811080242_hichki_chat_anon_privilege_hardening_v1` was recovered from `supabase_migrations.schema_migrations` and restored to Git source for reproducibility.
+The relay does not trust a client-provided sender identity or message payload as the source of truth.
 
-### Advisor evidence
+- Supabase access token is validated during the socket handshake.
+- Current conversation membership is re-checked for relay-sensitive events rather than trusted from an old room join.
+- Relayed messages/receipts are re-read from Supabase under the caller JWT before broadcast.
+- Recipient delivery uses current member user rooms instead of a permanently trusted conversation room.
+- No service-role key is required by the browser or relay service.
+- Supabase Realtime remains the fallback transport if the Socket.IO service is unavailable.
 
-Supabase Security Advisor returned zero security lints after the 2026-09-08 library migration. Performance advisor entries are informational unused-index notices; the new `library_items_owner_updated_idx` is expected to be unused until authenticated library traffic exists.
+## Local library privacy
 
-## Remaining security/runtime gates
+IndexedDB library visibility is account-scoped. Items belonging to another signed-in user are hidden and are not synced into the current account. Anonymous drafts can be claimed by the first authenticated account that syncs them. Synced items deleted remotely are removed locally when the next successful sync confirms they no longer exist.
 
-- Authenticated two-user RLS/runtime acceptance cannot yet be performed because the live Auth project contains zero users.
-- Socket.IO end-to-end authorization cannot be certified until the relay is running on a persistent WebSocket-capable host.
-- Production browser/native acceptance remains pending because Netlify production is still the older manual 2026-08-10 deployment.
+## Remaining security/runtime evidence
 
-Do not represent these runtime gates as passed until evidence exists.
+- Authenticated multi-user RLS/runtime acceptance remains pending because live Auth currently has zero users.
+- Full Socket.IO end-to-end acceptance needs a running persistent relay URL.
+- Native/web production acceptance remains pending because Netlify production still points at the older manual deployment.
+
+Do not label these pending runtime gates as passed without evidence.

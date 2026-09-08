@@ -4,51 +4,61 @@ Hichki is a local-first 1:1 chat, journal/notes and music app for web, Android a
 
 ## Product rule
 
-The existing Hichki product/UI remains the source product. Engineering work is additive: improve and complete the existing app rather than replacing it with a generic messenger or a parallel UI.
+Keep the existing Hichki identity and information architecture. Engineering changes are additive completion work, not a generic messenger redesign.
 
 ## Communication stack
 
-The current source provides:
-
 - Supabase Auth/session persistence
-- authenticated 1:1 conversation creation through JWT-protected `hichki-conversation-v3`
+- JWT-protected 1:1 conversation creation through `hichki-conversation-v3`
 - durable messages with per-sender `client_id` deduplication
-- Socket.IO as the preferred low-latency relay when `HICHKI_SOCKET_URL` is configured
-- Supabase Realtime as the durable fallback for messages, presence and typing
+- Socket.IO preferred low-latency relay when `HICHKI_SOCKET_URL` is configured
+- Supabase Realtime fallback for messages/presence/typing
 - delivered/read receipts
 - IndexedDB offline outbox with reconnect retry
 - Android/iOS + Web Push registration paths
-- RLS scoped to conversation membership
+- RLS scoped to current conversation membership
 
-Socket.IO does not replace database authorization. A message is persisted to Supabase first, then the relay re-reads the canonical row under the sender's JWT before broadcasting it. This prevents the socket layer from becoming a parallel unauthorised write path.
+Socket.IO is not a second database write path. Hichki persists a message/receipt to Supabase first; the relay authenticates the Supabase JWT, rechecks current membership and re-reads the canonical row before broadcasting it.
 
-## Notes and Music library
+## Notes and Music
 
-`hichki-library.js` adds a local-first Notes/Music library backed by IndexedDB and an owner-scoped Supabase `library_items` table. It supports cloud sync, note/music sharing into 1:1 chat, saving a received library item, native/Web Share export and PWA share-target ingestion of shared text/URLs.
+`hichki-library.js` provides account-isolated local-first data and owner-scoped Supabase sync. `hichki-library-ui.js` exposes a premium additive surface with:
 
-`hichki-music.js` continues to play local/user-owned audio and legitimate stream URLs with Media Session controls. Hichki does not download or redistribute copyrighted catalogues.
+- create/edit/delete Notes
+- save legitimate music/audio links
+- play compatible user-owned/direct audio through the Hichki music engine
+- share externally with Web Share/clipboard fallback
+- send a Note/Music item to an existing 1:1 Hichki chat
+- save received library metadata through the library API
+- receive shared titles/text/URLs through the installed PWA's Web Share Target
 
-## PWA sharing
+Hichki does not download or redistribute copyrighted music catalogues.
 
-The production manifest is post-processed with a Web Share Target entry. Installed Hichki PWAs can receive shared titles, text and URLs from supported apps/platforms; Hichki classifies common music links as Music items and other shared content as Notes.
+## Realtime service
 
-## Socket.IO service
+`realtime-server/` is a Node 22 Socket.IO relay with `/healthz`, Docker support, CORS allowlisting, JWT authentication, current-membership checks and basic per-socket rate limiting.
 
-The deployable server lives in `realtime-server/`. It requires a persistent WebSocket-capable Node 22 host and a Supabase publishable/anon key. It intentionally does not use a service-role key. The static Netlify site cannot itself host the persistent Socket.IO process.
+A static Netlify deployment cannot itself be the persistent Socket.IO process. `render.yaml` provides a current free Render web-service staging path. Render free services may sleep when inactive, so Supabase Realtime remains a mandatory fallback rather than treating free Socket.IO hosting as a single point of failure.
 
-## Build architecture
+Runtime variables for the relay:
 
-The original frontend source is still not fully checked into this repository. The build pipeline recovers the currently deployed Hichki web artifact, then injects the maintained runtime bridges, premium theme/gesture polish, library/share-target wiring and native/PWA assets before Vite builds the final output.
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY` (browser-safe publishable/anon credential, never `service_role`)
+- `ALLOWED_ORIGINS`
 
-Required browser build configuration:
+Browser build variables:
 
 - `HICHKI_SUPABASE_URL`
-- `HICHKI_SUPABASE_ANON_KEY` (or compatible publishable configuration used by the existing build)
+- `HICHKI_SUPABASE_ANON_KEY` (legacy variable name; a publishable key is accepted)
 - optional `HICHKI_VAPID_PUBLIC_KEY`
 - optional `HICHKI_SOCKET_URL`
 
-## Verification
+## Build architecture
 
-Repository guards syntax-check the browser bridges, Socket.IO server and Edge Functions, validate JSON, verify required migrations/runtime assets, protect against browser service-role leakage, and verify the built PWA includes the library runtime and share target.
+The original frontend source is still not fully checked into this repository. The build pipeline recovers the currently deployed Hichki web artifact, injects maintained realtime/offline/library/native/PWA assets and theme/gesture polish, then Vite produces the final build.
 
-The live Supabase migration `hichki_library_and_message_kinds_v1` was applied on 2026-09-08 and the post-migration structural security guard passed. Supabase Security Advisor reported zero security lints after the change. Authenticated multi-user runtime acceptance still requires test/user accounts, and Socket.IO production activation still requires a persistent WebSocket endpoint.
+This recovery architecture is a known maintainability constraint. Do not claim a full clean-source frontend rewrite unless the actual frontend source is first recovered and checked in.
+
+## Verification state
+
+Supabase library migration, structural authorization checks and Security Advisor have been verified. Key new Socket.IO/library files pass independent Node syntax parsing. Full dependency install/web build, authenticated two-user acceptance, production Netlify update and native build certification are still release gates documented in `PROJECT_STATUS.md`.
