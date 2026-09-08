@@ -1,4 +1,4 @@
-/* Hichki realtime client bridge v6. Supabase is persistence/fallback; Socket.IO is the preferred low-latency relay when configured. */
+/* Hichki realtime client bridge v7. Supabase is persistence/fallback; Socket.IO is the preferred low-latency relay when configured. */
 (() => {
   'use strict';
   const CFG = window.HICHKI_CONFIG || {};
@@ -53,9 +53,14 @@
     const db = await openDB(); if (!db) return;
     await new Promise((r, j) => { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(item); tx.oncomplete = r; tx.onerror = () => j(tx.error); });
   }
-  async function queueAll() {
-    const db = await openDB(); if (!db) return [];
-    return new Promise((r, j) => { const tx = db.transaction(STORE, 'readonly'); const q = tx.objectStore(STORE).getAll(); q.onsuccess = () => r(q.result || []); q.onerror = () => j(q.error); });
+  async function queueAll(ownerId) {
+    const db = await openDB(); if (!db || !ownerId) return [];
+    return new Promise((r, j) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const q = tx.objectStore(STORE).getAll();
+      q.onsuccess = () => r((q.result || []).filter(item => item?.sender_id === ownerId));
+      q.onerror = () => j(q.error);
+    });
   }
   async function queueDelete(id) {
     const db = await openDB(); if (!db) return;
@@ -215,10 +220,13 @@
   }
   async function flush() {
     if (state.flushing || !state.online || !state.user) return;
+    const flushUserId = state.user.id;
     state.flushing = true;
     try {
-      if (!state.client) await init(); if (!state.client) return;
-      for (const item of await queueAll()) {
+      if (!state.client) await init();
+      if (!state.client || state.user?.id !== flushUserId) return;
+      for (const item of await queueAll(flushUserId)) {
+        if (state.user?.id !== flushUserId) break;
         const result = await insertMessage(item);
         if (!result.error || /duplicate|unique/i.test(result.error.message || '')) await queueDelete(item.client_id);
         else emit('message-retry-needed', { item, error: result.error });
