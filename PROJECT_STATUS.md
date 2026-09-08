@@ -8,14 +8,27 @@ _Last verified against GitHub, Supabase and Netlify: 2026-09-08_
 - Main checkpoint before this continuation: `da78edc35a1703723dc08e884bf342a542e1f7f6`
 - Active engineering completion branch: `feat/hichki-completion-20260908-final`
 - Completion source checkpoint before reliability hardening: `90186fe16d28899bc89d1ea9a6d1ae691c558c11`
+- Reliability/skills checkpoint immediately before this status update: `39b45ca8dec6304add03bc9cf892694ba8ecc18c`
 - Mandatory agent instructions: `AGENTS.md`
 - Mandatory reliability protocol: `docs/AGENT_RELIABILITY_PROTOCOL.md`
+- Repository-local skills:
+  - `.agents/skills/hichki-reliability/SKILL.md`
+  - `.agents/skills/hichki-realtime-security/SKILL.md`
+  - `.agents/skills/hichki-mobile-release/SKILL.md`
 
 The working branch is intentionally separate from `main` so engineering verification can continue without misrepresenting incomplete work as a release. Other temporary/copy completion branch names are historical working artifacts and must not be selected merely because their names look newer. Resolve this active branch HEAD again at the start of every session.
 
-## Agent reliability hardening
+## Agent reliability / project isolation hardening
 
-Hichki now has repository-level mandatory agent instructions and an anti-hallucination/recovery protocol. New sessions must resolve current HEAD, read repository state before chat summaries, use explicit `SOURCE-CONFIRMED / TEST-PASS / RUNTIME-PASS / DEPLOYED / NOT-RUN / HISTORICAL / BLOCKED` evidence labels, pivot after two equivalent failed approaches, and checkpoint enough state for a new chat to resume without asking the owner to repeat history.
+Hichki now has repository-level mandatory agent instructions, an anti-hallucination/recovery protocol and three Hichki-specific repository skills. New sessions must resolve current HEAD, read repository state before chat summaries, use explicit `SOURCE-CONFIRMED / TEST-PASS / RUNTIME-PASS / DEPLOYED / NOT-RUN / HISTORICAL / BLOCKED` evidence labels, pivot after two equivalent failed approaches, and checkpoint enough state for a new chat to resume without asking the owner to repeat history.
+
+Project isolation is explicit: Stock Munim, digital-card and unrelated project state/evidence must not be imported into Hichki even when multiple projects are discussed in the same ChatGPT conversation.
+
+Skill routing is explicit in root `AGENTS.md`:
+
+- `hichki-reliability` for every fresh/resumed session;
+- `hichki-realtime-security` for chat/Socket.IO/Supabase/Auth/RLS/offline/private-media paths;
+- `hichki-mobile-release` for Web/PWA/Capacitor/native/build/Netlify/release work.
 
 This hardening is project-process protection. It does not itself certify any remaining runtime/release gate.
 
