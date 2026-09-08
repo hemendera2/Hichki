@@ -53,7 +53,7 @@ jobs:
             supabase/migrations/20260811131745_hichki_legacy_messages_lockdown_v1.sql \
             supabase/migrations/20260811131930_hichki_legacy_messages_deny_policy_v1.sql \
             supabase/migrations/20260811132035_hichki_security_definer_execute_lockdown_v1.sql \
-            supabase/migrations/20260908071300_hichki_library_and_message_kinds_v1.sql \
+            supabase/migrations/20260908073027_hichki_library_and_message_kinds_v1.sql \
             supabase/tests/database/library_security.sql; do
             test -s "$f"
           done

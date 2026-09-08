@@ -61,7 +61,7 @@ jobs:
           test -f supabase/migrations/20260811070355_hichki_chat_core_v1.sql
           test -f supabase/migrations/20260811072044_hichki_message_receipts_v1.sql
           test -f supabase/migrations/20260811080242_hichki_chat_anon_privilege_hardening_v1.sql
-          test -f supabase/migrations/20260908071300_hichki_library_and_message_kinds_v1.sql
+          test -f supabase/migrations/20260908073027_hichki_library_and_message_kinds_v1.sql
           test -f supabase/tests/database/library_security.sql
           test -f public/hichki-realtime.js
           test -f public/hichki-offline-queue.js
