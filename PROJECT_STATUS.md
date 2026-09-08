@@ -1,39 +1,42 @@
 # Hichki — Current Project Status
 
-_Last verified against GitHub/Supabase: 2026-08-11_
+_Last verified against GitHub, Supabase and Netlify: 2026-09-08_
 
-## Current implementation
+## Current source checkpoint
 
-Hichki is a local-first 1:1 chat, journal and music app targeting web, Android and iOS from one codebase.
+- Authoritative repository: `hemendera2/Hichki`
+- Main checkpoint before this continuation: `da78edc35a1703723dc08e884bf342a542e1f7f6`
+- Active completion branch: `feat/hichki-completion-20260908`
+- First completion commit: `1c8fb392472a3122e65a1b2f74ae1cb1d1a37852`
 
-The repository contains Auth/session persistence, authenticated direct-chat creation, durable message deduplication, Realtime messages/presence/typing, delivered/read receipts, IndexedDB offline retry, profile bootstrap, push-token registration, FCM/Web Push paths, service-worker notification handling, membership-scoped RLS, server-mediated conversation creation, and local music playback.
+The working branch is intentionally separate from `main` so ordinary source saves do not trigger the repository's main-branch GitHub Actions workflows while engineering verification is still in progress.
 
-## Security and integration work completed in this continuation
+## Completed in this continuation
 
-- Audited the live Hichki Supabase project `mzfwevtiydprksuwalpt`.
-- Closed the retired `public.messages` Data API surface: `anon`/`authenticated` have no table privileges and the old permissive policies are gone.
-- Added an explicit restrictive deny-all RLS policy to the retired table; Supabase security advisor is now clean with no security lints.
-- Removed `TRUNCATE`, `REFERENCES`, and `TRIGGER` table privileges from browser roles on the active Hichki tables.
-- Removed client-side `DELETE` privilege from `push_devices` and anonymous `DELETE` privilege from `push_subscriptions`.
-- Removed Data API execution privileges from the security-definer direct-chat/profile RPCs; live verification shows no `public`/`anon`/`authenticated` execute grants on those definer functions.
-- Recorded the live-generated migration versions in the repository, including `20260811131745_hichki_legacy_messages_lockdown_v1`, `20260811131930_hichki_legacy_messages_deny_policy_v1`, and `20260811132035_hichki_security_definer_execute_lockdown_v1`.
-- Fixed a real client integration mismatch: the browser realtime bridge was still invoking `hichki-conversation-v2`; both root and public bridge copies now route direct-chat creation through the active JWT-protected `hichki-conversation-v3` function.
-- The current `hichki-conversation-v3` Edge Function remains ACTIVE and JWT-protected; it authenticates the caller, rejects self-recipient requests, verifies the recipient through the admin API, and invokes the actor-bound conversation RPC.
+- Restored the paused Hichki Supabase project; it returned to `ACTIVE_HEALTHY`.
+- Added an authenticated Socket.IO relay server while retaining Supabase Realtime as the fallback transport.
+- Added client-side dual-transport deduplication so the same message delivered by Socket.IO and Supabase is not surfaced twice.
+- Kept Supabase as the durable write/authorization source; the Socket.IO server re-reads persisted messages/receipts under the caller JWT before relay.
+- Added local-first Notes/Music library support with IndexedDB + owner-scoped Supabase sync.
+- Added `note` and `music` chat message kinds and share-to-chat metadata.
+- Added Web Share/PWA share-target ingestion for shared text and URLs.
+- Added build/runtime guards for the new library asset and share target.
+- Recovered the exact missing live migration `20260811080242_hichki_chat_anon_privilege_hardening_v1` from Supabase migration history into Git source.
+- Applied live migration `hichki_library_and_message_kinds_v1` and ran a structural RLS/grants/chat-kind regression guard: PASS.
+- Supabase Security Advisor after the migration: 0 security lints.
 
-## Production verification
+## Verified deployment state
 
-The production build verifier validates required runtime files, runtime wiring, service-worker assets/notification handling, manifest icons, and build diagnostics.
+Netlify production is still the older manual deploy `6a7a077d7914a2c48483a4f0`, created 2026-08-10. It is not the new working-branch source and must not be described as updated.
 
-GitHub Actions results for the current revision are not available through the connected GitHub workflow-run API, so a green CI result cannot be claimed. The repository workflows do include `workflow_dispatch`, but the connected GitHub toolset does not expose a workflow-dispatch action.
-
-The build source remains externally recovered from the deployed Hichki web artifact, so a reproducible production build still depends on that remote source being reachable.
+The Netlify site is a static/manual deploy and has no persistent functions capable of acting as the Socket.IO server. `realtime-server/` therefore needs a separate persistent WebSocket-capable endpoint before the production web build can set `HICHKI_SOCKET_URL`.
 
 ## Remaining completion gates
 
-1. Reconcile the older live migration `20260811080242_hichki_chat_anon_privilege_hardening_v1` with its repository source so the full database history is reproducible from Git.
-2. Obtain a successful production build/integrity/static verification run.
-3. Verify the recovered frontend and injected runtime integrations as the intended Hichki product.
-4. Exercise authenticated chat, offline retry, Realtime, receipts, presence/typing and push paths with runtime evidence.
-5. Verify Android/iOS native builds for supported targets.
+1. Obtain/attach a persistent zero-cost WebSocket-capable Node endpoint for `realtime-server/`, then configure `HICHKI_SOCKET_URL`.
+2. Run authenticated two-user acceptance for message persistence, Socket.IO relay, Supabase fallback, duplicate suppression, receipts, typing, presence, offline retry and Notes/Music sharing. The live Auth project currently has no users, so this test cannot be truthfully claimed yet.
+3. Produce and verify a fresh production web build from the working source and update Netlify only after that build passes.
+4. Run Android and iOS build/acceptance paths against the updated web bundle.
+5. Merge to `main` only after the above release gates are satisfied or explicitly accepted.
 
-Status: **security/integration hardening materially advanced; production completion not yet proven**.
+Status: **major source/backend completion advanced; production release is not yet certified**.

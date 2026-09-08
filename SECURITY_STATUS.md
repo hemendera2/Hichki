@@ -1,32 +1,29 @@
 # Hichki Security Status
 
-## Verified findings — 2026-08-11
+## Verified findings — 2026-09-08
 
-The connected Supabase project was inspected directly.
+The connected Supabase project `mzfwevtiydprksuwalpt` was restored and inspected directly.
 
-### Active chat authorization
+### Chat authorization
 
-The `chat_messages` surface has authenticated membership-scoped SELECT/INSERT/UPDATE/DELETE policies. Message receipts are likewise constrained to the authenticated user and conversation membership.
+`chat_messages` remains membership-scoped by RLS. The new Socket.IO service is relay-only: it authenticates the Supabase access token, checks conversation membership, and re-reads a persisted canonical message/receipt under the caller JWT before broadcasting. It does not create a second unauthorised message-write path.
 
-### Legacy chat surface
+### Notes/Music library
 
-A legacy `public.messages` table was still carrying broad `public`/Data API access in the inspected database. Hichki's active chat contract uses `chat_messages`, so this legacy surface is now explicitly locked down in the repository migrations:
+`public.library_items` was created with RLS enabled. `anon` has no table privileges; `authenticated` receives only SELECT/INSERT/UPDATE/DELETE and each operation is restricted to `owner_id = auth.uid()`. The structural security regression guard passed after the live migration.
 
-- `20260811105000_hichki_legacy_messages_lockdown_v1.sql`
-- `20260811105500_hichki_legacy_messages_privilege_guard_v1.sql`
-- regression test: `supabase/tests/database/legacy_messages_lockdown.sql`
+### Legacy surfaces
 
-**Important:** the migration files are committed to GitHub. Applying DDL to the live Supabase project requires the repository migration runner/CI path; no direct destructive DDL was executed here merely to make the repository appear complete.
+The retired `public.messages` surface remains covered by lockdown migrations/regression guards. The previously missing live migration version `20260811080242_hichki_chat_anon_privilege_hardening_v1` was recovered from `supabase_migrations.schema_migrations` and restored to Git source for reproducibility.
 
-### Push functions
+### Advisor evidence
 
-The inspected project currently exposes active v3 push and conversation functions with JWT verification enabled. The current conversation v3 function authenticates the caller before invoking the actor-bound database RPC.
+Supabase Security Advisor returned zero security lints after the 2026-09-08 library migration. Performance advisor entries are informational unused-index notices; the new `library_items_owner_updated_idx` is expected to be unused until authenticated library traffic exists.
 
-## Remaining verification gates
+## Remaining security/runtime gates
 
-- Apply and verify the new legacy-table migration in the intended project through the canonical migration path.
-- Execute the database regression suite.
-- Verify production build and GitHub Actions results.
-- Exercise authenticated chat/realtime/offline/receipt/push flows end-to-end.
+- Authenticated two-user RLS/runtime acceptance cannot yet be performed because the live Auth project contains zero users.
+- Socket.IO end-to-end authorization cannot be certified until the relay is running on a persistent WebSocket-capable host.
+- Production browser/native acceptance remains pending because Netlify production is still the older manual 2026-08-10 deployment.
 
-Do not represent these gates as passed until actual evidence exists.
+Do not represent these runtime gates as passed until evidence exists.
