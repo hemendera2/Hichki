@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "HICHKI_CI_CONTRACT=V9"
+          echo "HICHKI_CI_CONTRACT=V10"
           echo "Building commit: $(git rev-parse HEAD)"
           echo "Expected commit: ${GITHUB_SHA}"
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
@@ -55,6 +55,21 @@ jobs:
 
       - name: Install
         run: npm install --no-audit --no-fund
+
+      - name: Verify generated root lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s package-lock.json
+          node -e "const p=require('./package-lock.json'); if(p.name!=='hichki'||p.version!=='2.6.0'||p.lockfileVersion!==3) process.exit(1)"
+
+      - name: Upload generated root lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: hichki-root-lock-${{ github.sha }}
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Recover deployed source for isolated build
         shell: bash
