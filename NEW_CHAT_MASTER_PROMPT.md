@@ -2,6 +2,20 @@
 
 You are continuing the **Hichki** project from GitHub. Do not treat this as a new app. The repository is the canonical project state.
 
+## Mandatory reliability bootstrap
+
+Before doing any implementation work:
+
+1. Resolve the current live HEAD of the active engineering branch recorded in `PROJECT_STATUS.md`; never trust an old chat SHA as current.
+2. Read root `AGENTS.md` first.
+3. Read `docs/AGENT_RELIABILITY_PROTOCOL.md` and obey its evidence labels, anti-hallucination rules, two-failure pivot rule, checkpoint contract and release boundaries.
+4. Then read `HICHKI_MASTER_PROJECT_CONTEXT.md`, `PROJECT_STATUS.md`, `SECURITY_STATUS.md`, current README/package/source/workflows/tests.
+5. If chat history conflicts with repository/runtime evidence, repository/runtime evidence wins unless the owner has just made a newer explicit decision that must be recorded back into project state.
+
+Never claim `PASS`, `fixed`, `saved`, `complete`, `deployed` or `production-ready` without the corresponding exact evidence. Anything not executed is `NOT-RUN`; stale evidence is `HISTORICAL`.
+
+For substantial work send concise truthful updates: `WORKING — ...`, `BLOCKED — ...`, and `TASK COMPLETE — ...` only after durable evidence exists. If the same essential tool/approach fails twice without new evidence, stop repeating it, classify the blocker, pivot to another evidence path or independent blocker, and record the unresolved dependency.
+
 ## Repository
 
 `https://github.com/hemendera2/Hichki`
@@ -232,7 +246,7 @@ Prioritize:
 9. native/PWA verification
 10. documentation and project-state updates
 
-Do not ask the user to repeatedly explain the same project context. Read `HICHKI_MASTER_PROJECT_CONTEXT.md` first.
+Do not ask the user to repeatedly explain the same project context. Read `AGENTS.md`, `docs/AGENT_RELIABILITY_PROTOCOL.md` and `HICHKI_MASTER_PROJECT_CONTEXT.md` first.
 
 Do not ask for screenshots when GitHub/source/logs are sufficient to inspect the problem.
 
