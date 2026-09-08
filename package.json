@@ -1,12 +1,13 @@
 {
   "name": "hichki",
   "private": true,
-  "version": "2.5.0",
-  "description": "Hichki — local-first 1:1 chat, journal and music app",
+  "version": "2.6.0",
+  "description": "Hichki — local-first 1:1 chat, journal/notes and music app",
   "scripts": {
-    "prepare:web": "node --import ./scripts/local-netlify-fetch.mjs scripts/prepare-web.mjs && node scripts/ensure-vendored-source.mjs && node scripts/inject-hichki-bridge.mjs && node scripts/copy-runtime-assets.mjs",
+    "prepare:web": "node --import ./scripts/local-netlify-fetch.mjs scripts/prepare-web.mjs && node scripts/ensure-vendored-source.mjs && node scripts/inject-hichki-bridge.mjs && node scripts/enable-hichki-v3-features.mjs && node scripts/copy-runtime-assets.mjs",
     "dev": "npm run prepare:web && vite",
     "build": "npm run prepare:web && vite build && node scripts/verify-dist-runtime-assets.mjs",
+    "verify:build": "node scripts/verify-build-output.mjs",
     "cap:add:android": "npx cap add android",
     "cap:add:ios": "npx cap add ios",
     "cap:sync": "npx cap sync",
