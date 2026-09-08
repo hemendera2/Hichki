@@ -3,7 +3,7 @@ name: Hichki iOS Simulator
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, feat/hichki-completion-20260908]
 
 permissions:
   contents: read
@@ -20,7 +20,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -s package-lock.json
+
       - name: Select Xcode 26
+        shell: bash
         run: |
           set -euo pipefail
           XCODE_26=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1 || true)
@@ -32,12 +40,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --include=dev --no-audit --no-fund
 
-      - name: Build web app
-        run: npm run build
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          test -x node_modules/.bin/capacitor
+          test -z "$(git status --porcelain package-lock.json)"
+
+      - name: Build and verify web app
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build
+          npm run verify:build
 
       - name: Create iOS project with SPM
         run: npx cap add ios --packagemanager SPM
@@ -50,7 +72,9 @@ jobs:
         run: xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 
       - name: Verify iOS project
+        shell: bash
         run: |
+          set -euo pipefail
           test -f ios/App/App.xcodeproj/project.pbxproj
           test -f ios/App/App/Info.plist
 
@@ -75,6 +99,7 @@ jobs:
       - name: Upload iOS simulator app
         uses: actions/upload-artifact@v4
         with:
-          name: hichki-ios-simulator
+          name: hichki-ios-simulator-${{ github.sha }}
           path: ios/App/build/Build/Products/Debug-iphonesimulator/App.app
           if-no-files-found: error
+          retention-days: 7
