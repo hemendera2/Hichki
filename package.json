@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "prepare:web": "node --import ./scripts/local-netlify-fetch.mjs scripts/prepare-web.mjs && node scripts/ensure-vendored-source.mjs && node scripts/inject-hichki-bridge.mjs && node scripts/enable-hichki-v3-features.mjs && node scripts/normalize-manifest.mjs && node scripts/copy-runtime-assets.mjs",
+    "prepare:web": "node --import ./scripts/local-netlify-fetch.mjs scripts/prepare-web.mjs && node scripts/ensure-vendored-source.mjs && node scripts/retire-legacy-runtime.mjs && node scripts/inject-hichki-bridge.mjs && node scripts/enable-hichki-v3-features.mjs && node scripts/normalize-manifest.mjs && node scripts/copy-runtime-assets.mjs",
     "dev": "npm run prepare:web && vite",
     "build": "npm run prepare:web && vite build && node scripts/verify-dist-runtime-assets.mjs",
     "verify:build": "node scripts/verify-build-output.mjs",
