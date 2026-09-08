@@ -27,10 +27,11 @@ BEGIN
      AND policyname IN (
        'hichki_chat_media_select_member',
        'hichki_chat_media_insert_member_owner',
+       'hichki_chat_media_update_owner',
        'hichki_chat_media_delete_owner'
      );
-  IF policy_count <> 3 THEN
-    RAISE EXCEPTION 'expected three private media object policies, found %', policy_count;
+  IF policy_count <> 4 THEN
+    RAISE EXCEPTION 'expected four private media object policies, found %', policy_count;
   END IF;
 
   SELECT has_function_privilege('anon', 'public.hichki_media_conversation_id(text)', 'EXECUTE') INTO helper_anon;
